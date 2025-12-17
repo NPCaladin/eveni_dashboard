@@ -361,7 +361,7 @@ export function ConsultantResourceManager() {
             컨설턴트 데이터가 없습니다. 엑셀을 업로드하거나 전주 데이터를 복사하세요.
           </div>
         ) : (
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion type="single" className="w-full">
             {Object.entries(groupedConsultants).map(([jobGroup, consultantList]) => (
               <AccordionItem key={jobGroup} value={jobGroup}>
                 <AccordionTrigger value={jobGroup} className="hover:no-underline">

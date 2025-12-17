@@ -298,7 +298,7 @@ export function ConsultantResourceSection({
         {showDetail && (
           <Card>
             <CardContent className="pt-6">
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion type="single" className="w-full">
                 {Object.entries(groupedConsultants).map(([jobGroup, consultantList]) => {
                   const generalOk = canTeachGeneral(jobGroup, consultantList);
                   const oneTierOk = canTeachOneTier(jobGroup, consultantList);
