@@ -327,8 +327,8 @@ export function DepartmentIssuesForm() {
                   <div className="flex items-center gap-3">
                     <Checkbox
                       checked={issue.is_completed}
-                      onCheckedChange={(checked) =>
-                        handleIssueChange(category, index, "is_completed", checked as boolean)
+                      onChange={(e) =>
+                        handleIssueChange(category, index, "is_completed", e.target.checked)
                       }
                     />
                     <Label className="text-sm font-medium">
