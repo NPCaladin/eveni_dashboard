@@ -541,70 +541,78 @@ export default function SalesDashboardPage() {
           const weeklyData: any[] = [];
           const monthlyMap = new Map<string, any>();
 
-          // 최근 12주 데이터 가져오기
-          for (let i = 11; i >= 0; i--) {
-            const weekStart = new Date(weekStartDate);
-            weekStart.setDate(weekStart.getDate() - i * 7);
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekEnd.getDate() + 6);
+          // 최근 12주의 weekly_reports 가져오기
+          const { data: recentReports, error: reportsError } = await supabase
+            .from("weekly_reports")
+            .select("id, title, start_date, end_date")
+            .lte("start_date", weekStartDate)
+            .order("start_date", { ascending: false })
+            .limit(12);
 
-            const prevYearWeekStart = new Date(weekStart);
-            prevYearWeekStart.setFullYear(prevYearWeekStart.getFullYear() - 1);
-            const prevYearWeekEnd = new Date(weekEnd);
-            prevYearWeekEnd.setFullYear(prevYearWeekEnd.getFullYear() - 1);
+          if (reportsError) {
+            console.error("Error fetching recent reports:", reportsError);
+            return { weeklyData: [], monthlyData: [] };
+          }
 
-            // 2025년 데이터
-            const { data: current2025 } = await supabase
-              .from("sales_transactions")
+          if (!recentReports || recentReports.length === 0) {
+            return { weeklyData: [], monthlyData: [] };
+          }
+
+          // 역순으로 정렬 (오래된 것부터)
+          const sortedReports = [...recentReports].reverse();
+
+          // 각 주차의 데이터 가져오기
+          for (let i = 0; i < sortedReports.length; i++) {
+            const report = sortedReports[i];
+            
+            // edu_revenue_stats에서 순매출 데이터 가져오기
+            const { data: revenueStats } = await supabase
+              .from("edu_revenue_stats")
               .select("*")
-              .gte("payment_date", formatDate(weekStart))
-              .lte("payment_date", formatDate(weekEnd))
-              .eq("status", "결");
+              .eq("report_id", report.id)
+              .eq("category", "순매출")
+              .maybeSingle();
 
-            // 2024년 데이터
-            const { data: prev2024 } = await supabase
-              .from("sales_transactions")
+            // 실매출에서 환불액 가져오기
+            const { data: grossRevenueStats } = await supabase
+              .from("edu_revenue_stats")
               .select("*")
-              .gte("payment_date", formatDate(prevYearWeekStart))
-              .lte("payment_date", formatDate(prevYearWeekEnd))
-              .eq("status", "결");
+              .eq("report_id", report.id)
+              .eq("category", "실매출")
+              .maybeSingle();
 
-            // 환불 데이터
-            const { data: refunds } = await supabase
-              .from("sales_transactions")
-              .select("*")
-              .gte("refund_date", formatDate(weekStart))
-              .lte("refund_date", formatDate(weekEnd))
-              .gt("refund_amount", 0);
+            const netRevenue = revenueStats?.weekly_amt || 0;
+            const grossRevenue = grossRevenueStats?.weekly_amt || 0;
+            const refundAmount = grossRevenue - netRevenue;
 
-            const revenue2025 = aggregateRevenue(current2025 || []).revenue;
-            const revenue2024 = aggregateRevenue(prev2024 || []).revenue;
-            const refundAmt = aggregateRefund(refunds || []).amount;
+            // 전년 동기 데이터 (yoy_amt 사용)
+            const netRevenue2024 = revenueStats?.yoy_amt || 0;
 
-            const weekLabel = `W${12 - i}`;
+            const weekLabel = report.title || `W${i + 1}`;
             weeklyData.push({
               label: weekLabel,
-              netRevenue2025: revenue2025 - refundAmt,
-              netRevenue2024: revenue2024,
-              refund: refundAmt,
+              netRevenue2025: netRevenue,
+              netRevenue2024: netRevenue2024,
+              refund: refundAmount,
             });
 
             // 월별 집계
-            const monthKey = `${weekStart.getFullYear()}-${String(
-              weekStart.getMonth() + 1
+            const reportDate = new Date(report.start_date);
+            const monthKey = `${reportDate.getFullYear()}-${String(
+              reportDate.getMonth() + 1
             ).padStart(2, "0")}`;
             if (!monthlyMap.has(monthKey)) {
               monthlyMap.set(monthKey, {
-                label: `${weekStart.getMonth() + 1}월`,
+                label: `${reportDate.getMonth() + 1}월`,
                 netRevenue2025: 0,
                 netRevenue2024: 0,
                 refund: 0,
               });
             }
             const monthData = monthlyMap.get(monthKey);
-            monthData.netRevenue2025 += revenue2025 - refundAmt;
-            monthData.netRevenue2024 += revenue2024;
-            monthData.refund += refundAmt;
+            monthData.netRevenue2025 += netRevenue;
+            monthData.netRevenue2024 += netRevenue2024;
+            monthData.refund += refundAmount;
           }
 
           return {
