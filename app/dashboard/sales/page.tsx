@@ -546,7 +546,7 @@ export default function SalesDashboardPage() {
             const { data: recentReports, error: reportsError } = await supabase
               .from("weekly_reports")
               .select("id, title, start_date, end_date")
-              .lte("start_date", weekStartDate)
+              .lte("start_date", formatDate(weekStartDate))
               .order("start_date", { ascending: false })
               .limit(12);
 
