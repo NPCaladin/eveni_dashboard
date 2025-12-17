@@ -146,12 +146,34 @@ export function parseIssues(text: string): ParsedIssue[] {
  * 멘토 보고서 전체 파싱
  */
 export function parseMentorReport(report: any): ParsedMentorReport {
+  const issuesText = report.issues || "";
+  const noteText = report.note || "";
+  
+  // 주요 이슈 파싱
+  let allIssues = parseIssues(issuesText);
+  
+  // 주요 이슈가 비어있고 비고에 번호로 시작하는 내용이 있으면 비고도 파싱
+  if (allIssues.length === 0 && noteText.trim()) {
+    const noteIssues = parseIssues(noteText);
+    if (noteIssues.length > 0) {
+      allIssues = noteIssues;
+      // 비고에서 파싱한 경우 note는 빈 문자열로 (중복 방지)
+      return {
+        mentorName: report.mentor_name || report.mentorName,
+        menteeStatus: parseMenteeStatus(report.mentee_status || report.menteeStatus),
+        issues: allIssues,
+        note: "",
+        rawIssues: noteText,
+      };
+    }
+  }
+  
   return {
     mentorName: report.mentor_name || report.mentorName,
     menteeStatus: parseMenteeStatus(report.mentee_status || report.menteeStatus),
-    issues: parseIssues(report.issues),
-    note: report.note,
-    rawIssues: report.issues,
+    issues: allIssues,
+    note: noteText,
+    rawIssues: issuesText,
   };
 }
 
