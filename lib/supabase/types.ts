@@ -324,6 +324,134 @@ export interface Database {
           updated_at?: string;
         };
       };
+      mkt_ad_overview: {
+        Row: {
+          id: string;
+          report_id: string;
+          media: string;
+          stage_1_name: string | null;
+          stage_1_count: number;
+          stage_1_cost_per_lead: number;
+          stage_2_name: string | null;
+          stage_2_count: number;
+          stage_2_conversion_rate: number | null;
+          stage_2_cost_per_lead: number;
+          total_spend: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          report_id: string;
+          media: string;
+          stage_1_name?: string | null;
+          stage_1_count?: number;
+          stage_1_cost_per_lead?: number;
+          stage_2_name?: string | null;
+          stage_2_count?: number;
+          stage_2_conversion_rate?: number | null;
+          stage_2_cost_per_lead?: number;
+          total_spend?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          report_id?: string;
+          media?: string;
+          stage_1_name?: string | null;
+          stage_1_count?: number;
+          stage_1_cost_per_lead?: number;
+          stage_2_name?: string | null;
+          stage_2_count?: number;
+          stage_2_conversion_rate?: number | null;
+          stage_2_cost_per_lead?: number;
+          total_spend?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      mkt_cost_trend: {
+        Row: {
+          id: string;
+          report_id: string;
+          media: string;
+          stage_1_cost: number;
+          stage_2_cost: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          report_id: string;
+          media: string;
+          stage_1_cost?: number;
+          stage_2_cost?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          report_id?: string;
+          media?: string;
+          stage_1_cost?: number;
+          stage_2_cost?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      mkt_db_count_trend: {
+        Row: {
+          id: string;
+          report_id: string;
+          media: string;
+          stage_1_count: number;
+          stage_2_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          report_id: string;
+          media: string;
+          stage_1_count?: number;
+          stage_2_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          report_id?: string;
+          media?: string;
+          stage_1_count?: number;
+          stage_2_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      mkt_report_notes: {
+        Row: {
+          id: string;
+          report_id: string;
+          content: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          report_id: string;
+          content?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          report_id?: string;
+          content?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
   };
 }
