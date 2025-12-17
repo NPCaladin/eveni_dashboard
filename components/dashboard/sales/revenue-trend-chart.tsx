@@ -39,13 +39,29 @@ export function RevenueTrendChart({
   );
 
   const formatCurrency = (value: number) => {
-    const millions = value / 10000;
-    return `${millions.toFixed(0)}만`;
+    const eok = Math.floor(value / 100000000);
+    const man = Math.floor((value % 100000000) / 10000);
+    
+    if (eok > 0) {
+      if (man > 0) {
+        return `${eok}억 ${man.toLocaleString()}만`;
+      }
+      return `${eok}억`;
+    }
+    return `${man.toLocaleString()}만`;
   };
 
   const formatTooltip = (value: number) => {
-    const millions = value / 10000;
-    return `${millions.toLocaleString()}만원`;
+    const eok = Math.floor(value / 100000000);
+    const man = Math.floor((value % 100000000) / 10000);
+    
+    if (eok > 0) {
+      if (man > 0) {
+        return `${eok}억 ${man.toLocaleString()}만원`;
+      }
+      return `${eok}억원`;
+    }
+    return `${man.toLocaleString()}만원`;
   };
 
   const getData = () => {
