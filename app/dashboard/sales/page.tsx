@@ -541,84 +541,84 @@ export default function SalesDashboardPage() {
           const weeklyData: any[] = [];
           const monthlyMap = new Map<string, any>();
 
-          // 최근 12주의 weekly_reports 가져오기
-          const { data: recentReports, error: reportsError } = await supabase
-            .from("weekly_reports")
-            .select("id, title, start_date, end_date")
-            .lte("start_date", weekStartDate)
-            .order("start_date", { ascending: false })
-            .limit(12);
+          try {
+            // 최근 12주의 weekly_reports 가져오기
+            const { data: recentReports, error: reportsError } = await supabase
+              .from("weekly_reports")
+              .select("id, title, start_date, end_date")
+              .lte("start_date", weekStartDate)
+              .order("start_date", { ascending: false })
+              .limit(12);
 
-          if (reportsError) {
-            console.error("Error fetching recent reports:", reportsError);
-            return { weeklyData: [], monthlyData: [] };
-          }
-
-          if (!recentReports || recentReports.length === 0) {
-            return { weeklyData: [], monthlyData: [] };
-          }
-
-          // 역순으로 정렬 (오래된 것부터)
-          const sortedReports = [...recentReports].reverse();
-
-          // 각 주차의 데이터 가져오기
-          for (let i = 0; i < sortedReports.length; i++) {
-            const report = sortedReports[i];
-            
-            // edu_revenue_stats에서 순매출 데이터 가져오기
-            const { data: revenueStats } = await supabase
-              .from("edu_revenue_stats")
-              .select("*")
-              .eq("report_id", report.id)
-              .eq("category", "순매출")
-              .maybeSingle();
-
-            // 실매출에서 환불액 가져오기
-            const { data: grossRevenueStats } = await supabase
-              .from("edu_revenue_stats")
-              .select("*")
-              .eq("report_id", report.id)
-              .eq("category", "실매출")
-              .maybeSingle();
-
-            const netRevenue = revenueStats?.weekly_amt || 0;
-            const grossRevenue = grossRevenueStats?.weekly_amt || 0;
-            const refundAmount = grossRevenue - netRevenue;
-
-            // 전년 동기 데이터 (yoy_amt 사용)
-            const netRevenue2024 = revenueStats?.yoy_amt || 0;
-
-            const weekLabel = report.title || `W${i + 1}`;
-            weeklyData.push({
-              label: weekLabel,
-              netRevenue2025: netRevenue,
-              netRevenue2024: netRevenue2024,
-              refund: refundAmount,
-            });
-
-            // 월별 집계
-            const reportDate = new Date(report.start_date);
-            const monthKey = `${reportDate.getFullYear()}-${String(
-              reportDate.getMonth() + 1
-            ).padStart(2, "0")}`;
-            if (!monthlyMap.has(monthKey)) {
-              monthlyMap.set(monthKey, {
-                label: `${reportDate.getMonth() + 1}월`,
-                netRevenue2025: 0,
-                netRevenue2024: 0,
-                refund: 0,
-              });
+            if (reportsError) {
+              console.error("Error fetching recent reports:", reportsError);
+              throw reportsError;
             }
-            const monthData = monthlyMap.get(monthKey);
-            monthData.netRevenue2025 += netRevenue;
-            monthData.netRevenue2024 += netRevenue2024;
-            monthData.refund += refundAmount;
-          }
 
-          return {
-            weeklyData,
-            monthlyData: Array.from(monthlyMap.values()),
-          };
+            if (!recentReports || recentReports.length === 0) {
+              console.warn("No recent reports found");
+              return { weeklyData: [], monthlyData: [] };
+            }
+
+            // 역순으로 정렬 (오래된 것부터)
+            const sortedReports = [...recentReports].reverse();
+
+            // 각 주차의 데이터 가져오기
+            for (let i = 0; i < sortedReports.length; i++) {
+              const report = sortedReports[i];
+              
+              // edu_revenue_stats에서 순매출, 실매출 데이터 가져오기
+              const { data: revenueStats } = await supabase
+                .from("edu_revenue_stats")
+                .select("*")
+                .eq("report_id", report.id)
+                .in("category", ["실매출", "순매출"]);
+
+              const netRevenueRow = revenueStats?.find(r => r.category === "순매출");
+              const grossRevenueRow = revenueStats?.find(r => r.category === "실매출");
+
+              const netRevenue = netRevenueRow?.weekly_amt || 0;
+              const grossRevenue = grossRevenueRow?.weekly_amt || 0;
+              const refundAmount = grossRevenue - netRevenue;
+
+              // 전년 동기 데이터 (yoy_amt 사용)
+              const netRevenue2024 = netRevenueRow?.yoy_amt || 0;
+
+              const weekLabel = report.title || `W${i + 1}`;
+              weeklyData.push({
+                label: weekLabel,
+                netRevenue2025: netRevenue,
+                netRevenue2024: netRevenue2024,
+                refund: refundAmount,
+              });
+
+              // 월별 집계
+              const reportDate = new Date(report.start_date);
+              const monthKey = `${reportDate.getFullYear()}-${String(
+                reportDate.getMonth() + 1
+              ).padStart(2, "0")}`;
+              if (!monthlyMap.has(monthKey)) {
+                monthlyMap.set(monthKey, {
+                  label: `${reportDate.getMonth() + 1}월`,
+                  netRevenue2025: 0,
+                  netRevenue2024: 0,
+                  refund: 0,
+                });
+              }
+              const monthData = monthlyMap.get(monthKey);
+              monthData.netRevenue2025 += netRevenue;
+              monthData.netRevenue2024 += netRevenue2024;
+              monthData.refund += refundAmount;
+            }
+
+            return {
+              weeklyData,
+              monthlyData: Array.from(monthlyMap.values()),
+            };
+          } catch (error) {
+            console.error("Error generating trend data:", error);
+            return { weeklyData: [], monthlyData: [] };
+          }
         };
 
         const trendData = await generateTrendData();
