@@ -14,16 +14,26 @@ const STATUS_MAPPING: Record<string, string> = {
   "가능": "가능",
   "불가": "불가",
   "조율": "조율",
-  "전체마감": "전체마감",
   "가능 ": "가능",
   "불가 ": "불가",
   "조율 ": "조율",
-  "전체마감 ": "전체마감",
+};
+
+const GRADE_MAPPING: Record<string, string> = {
+  "베테랑": "베테랑",
+  "베테랑 컨설턴트": "베테랑",
+  "숙련": "숙련",
+  "숙련 컨설턴트": "숙련",
+  "일반": "일반",
+  "일반 컨설턴트": "일반",
 };
 
 interface ResourceRow {
   job_group: string;
+  consultant_name: string;
+  grade: string;
   status: string;
+  capacity: number;
   note: string | null;
 }
 
@@ -78,12 +88,21 @@ export function ConsultantResourceUpload() {
       }
 
       const headers = jsonData[headerRowIndex].map((h: any) => String(h).trim());
-      const jobGroupIndex = headers.findIndex((h) => h.includes("직군"));
-      const statusIndex = headers.findIndex((h) => h.includes("상태") || h.includes("현황"));
+      const jobGroupIndex = headers.findIndex((h) => h.includes("직군") || h.includes("직무"));
+      const nameIndex = headers.findIndex((h) => h.includes("컨설턴트명") || h.includes("이름"));
+      const gradeIndex = headers.findIndex((h) => h.includes("직급") || h.includes("등급"));
+      const statusIndex = headers.findIndex((h) => h.includes("상태") || h.includes("현황") || h.includes("배정 가능 여부"));
+      const capacityIndex = headers.findIndex((h) => h.includes("수용") || h.includes("인원"));
       const noteIndex = headers.findIndex((h) => h.includes("비고"));
 
       if (jobGroupIndex === -1) {
-        throw new Error("엑셀 파일에서 '직군' 열을 찾을 수 없습니다.");
+        throw new Error("엑셀 파일에서 '직군' 또는 '직무' 열을 찾을 수 없습니다.");
+      }
+      if (nameIndex === -1) {
+        throw new Error("엑셀 파일에서 '컨설턴트명' 열을 찾을 수 없습니다.");
+      }
+      if (gradeIndex === -1) {
+        throw new Error("엑셀 파일에서 '직급' 또는 '등급' 열을 찾을 수 없습니다.");
       }
 
       const resources: ResourceRow[] = [];
@@ -93,15 +112,25 @@ export function ConsultantResourceUpload() {
         if (!row || row.length === 0) continue;
 
         const jobGroup = row[jobGroupIndex] ? String(row[jobGroupIndex]).trim() : "";
-        if (!jobGroup) continue;
+        const consultantName = row[nameIndex] ? String(row[nameIndex]).trim() : "";
+        if (!jobGroup || !consultantName) continue;
+
+        const rawGrade = row[gradeIndex] ? String(row[gradeIndex]).trim() : "";
+        const grade = GRADE_MAPPING[rawGrade] || "일반";
 
         const rawStatus = statusIndex >= 0 && row[statusIndex] ? String(row[statusIndex]).trim() : "가능";
         const status = STATUS_MAPPING[rawStatus] || "가능";
+
+        const capacity = capacityIndex >= 0 && row[capacityIndex] ? Number(row[capacityIndex]) : 0;
+        
         const note = noteIndex >= 0 && row[noteIndex] ? String(row[noteIndex]).trim() : null;
 
         resources.push({
           job_group: jobGroup,
+          consultant_name: consultantName,
+          grade,
           status,
+          capacity: isNaN(capacity) ? 0 : capacity,
           note,
         });
       }
@@ -124,7 +153,10 @@ export function ConsultantResourceUpload() {
       const insertData = resources.map((resource) => ({
         report_id: reportId,
         job_group: resource.job_group,
+        consultant_name: resource.consultant_name,
+        grade: resource.grade,
         status: resource.status,
+        capacity: resource.capacity,
         note: resource.note,
       }));
 
@@ -165,7 +197,7 @@ export function ConsultantResourceUpload() {
         <CardDescription>
           엑셀 파일로 컨설턴트 리소스 현황을 일괄 업로드합니다.
           <br />
-          엑셀 형식: 직군, 상태(가능/불가/조율/전체마감), 비고
+          엑셀 형식: 직무(직군), 컨설턴트 직급(등급), 컨설턴트명, 배정 가능 여부(상태), 수용 가능 인원, 비고
         </CardDescription>
       </CardHeader>
       <CardContent>

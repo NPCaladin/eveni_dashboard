@@ -281,8 +281,8 @@ export default function SalesDashboardPage() {
         const { data: prevWeekRefunds } = await supabase
           .from("sales_transactions")
           .select("*")
-          .gte("refund_date", formatDate(prevWeekStart))
-          .lte("refund_date", formatDate(prevWeekEnd))
+          .gte("refund_date", formatDate(prevWeekStartDate))
+          .lte("refund_date", formatDate(prevWeekEndDate))
           .gt("refund_amount", 0);
 
         // 8. 전년 환불 데이터

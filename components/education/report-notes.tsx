@@ -17,6 +17,8 @@ export function ReportNotes() {
   const [loading, setLoading] = useState(false);
 
   const applyCommand = (cmd: string, value?: string) => {
+    // CSS 스타일 사용 활성화 (컬러가 제대로 적용되도록)
+    document.execCommand('styleWithCSS', false, 'true');
     document.execCommand(cmd, false, value);
     editorRef.current?.focus();
   };

@@ -130,16 +130,20 @@ export function RevenueHistory() {
       };
       if (r.category === "실매출") {
         prev.real = r.weekly_amt;
-        prev.refund = r.monthly_refund_amt;
       } else if (r.category === "순매출") {
         prev.net = r.weekly_amt;
-        if (!prev.refund) prev.refund = r.monthly_refund_amt;
       }
       map.set(key, prev);
     });
 
+    // 환불액 계산: 실매출 - 순매출
+    const result = Array.from(map.values()).map((row) => ({
+      ...row,
+      refund: row.real - row.net,
+    }));
+
     // 이미 서버에서 필터링되었으므로 클라이언트 필터링 제거
-    return Array.from(map.values()).sort((a, b) => (a.start_date < b.start_date ? 1 : -1)); // desc
+    return result.sort((a, b) => (a.start_date < b.start_date ? 1 : -1)); // desc
   }, [rows, startFilter, endFilter]);
 
   const formatCurrency = (v: number) =>

@@ -89,15 +89,27 @@ export function ManagementSection({
                 <AccordionContent value={category}>
                   <div className="space-y-4">
                     {reports.map((report) => (
-                      <div key={report.id} className="space-y-2 rounded-lg border p-4">
+                      <div key={report.id} className="space-y-3 rounded-lg border p-4 bg-card">
                         <div className="flex items-center gap-2">
                           {(report as any).is_completed && (
-                            <span className="text-xs text-green-600">✓ 완료</span>
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                              ✓ 완료
+                            </span>
                           )}
                         </div>
-                        <p className="text-sm">{report.content}</p>
+                        <div 
+                          className="prose prose-sm max-w-none text-sm leading-relaxed"
+                          dangerouslySetInnerHTML={{ __html: report.content }}
+                          style={{
+                            wordBreak: 'break-word',
+                          }}
+                        />
                         {report.note && (
-                          <p className="text-xs text-muted-foreground">비고: {report.note}</p>
+                          <div className="mt-2 pt-2 border-t">
+                            <p className="text-xs text-muted-foreground whitespace-pre-wrap">
+                              <span className="font-medium">비고:</span> {report.note}
+                            </p>
+                          </div>
                         )}
                       </div>
                     ))}

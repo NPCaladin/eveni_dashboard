@@ -5,22 +5,22 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import * as XLSX from "xlsx";
+import { supabase } from "@/lib/supabase/client";
 import {
-  ConsultantResource,
-  ConsultantResourceRaw,
-} from "@/lib/types/consultant";
-import {
-  parseConsultantResource,
-  groupByJobCategory,
-  calculateResourceSummary,
-} from "@/lib/utils/parse-consultant-resource";
-import { ResourceSummaryCards } from "./resource-summary-cards";
-import { JobCategoryAccordion } from "./job-category-accordion";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import type { Database } from "@/lib/supabase/types";
+
+type ConsultantResource = Database["public"]["Tables"]["consultant_resources"]["Row"];
 
 interface ConsultantResourceSectionProps {
   reportId?: string;
 }
+
+const EXCEPTION_JOBS = ['데이터분석', '사운드', '아트', '프로그래밍', '경영지원'];
 
 export function ConsultantResourceSection({
   reportId,
@@ -32,32 +32,35 @@ export function ConsultantResourceSection({
 
   useEffect(() => {
     const loadResourceData = async () => {
+      if (!reportId) {
+        setLoading(false);
+        setConsultants([]);
+        return;
+      }
+
       setLoading(true);
       setError(null);
 
       try {
-        // 엑셀 파일 로드
-        const response = await fetch("/data/T_resorce.xlsx");
-        
-        if (!response.ok) {
-          throw new Error("파일을 찾을 수 없습니다");
+        // Supabase에서 해당 주차의 리소스 데이터 가져오기
+        const { data, error: fetchError } = await supabase
+          .from("consultant_resources")
+          .select("*")
+          .eq("report_id", reportId)
+          .order("job_group", { ascending: true })
+          .order("grade", { ascending: false })
+          .order("consultant_name", { ascending: true });
+
+        if (fetchError) throw fetchError;
+
+        if (!data || data.length === 0) {
+          console.log(`⚠️ 컨설턴트 리소스 데이터 없음 (report_id: ${reportId})`);
+          setConsultants([]);
+          return;
         }
 
-        const arrayBuffer = await response.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        
-        // JSON으로 변환
-        const rawData: ConsultantResourceRaw[] = XLSX.utils.sheet_to_json(
-          worksheet
-        );
-
-        // 데이터 파싱
-        const parsedData = rawData.map(parseConsultantResource);
-
-        console.log(`✓ 컨설턴트 리소스 로드: ${parsedData.length}명`);
-        setConsultants(parsedData);
+        console.log(`✓ 컨설턴트 리소스 로드: ${data.length}명`);
+        setConsultants(data);
       } catch (err) {
         console.error("Error loading consultant resources:", err);
         setError(
@@ -94,69 +97,173 @@ export function ConsultantResourceSection({
     return (
       <Alert>
         <AlertDescription>
-          컨설턴트 리소스 데이터가 없습니다. 어드민에서 엑셀 파일을
-          업로드해주세요.
+          이 주차의 컨설턴트 리소스 데이터가 없습니다. 어드민 페이지에서 입력해주세요.
         </AlertDescription>
       </Alert>
     );
   }
 
-  const summary = calculateResourceSummary(consultants);
-  const groups = groupByJobCategory(consultants);
+  // 직군별 그룹화
+  const groupedConsultants = consultants.reduce((acc, consultant) => {
+    const group = consultant.job_group;
+    if (!acc[group]) {
+      acc[group] = [];
+    }
+    acc[group].push(consultant);
+    return acc;
+  }, {} as Record<string, ConsultantResource[]>);
 
-  // 1타/일반 수업 가능 여부 계산
-  const EXCEPTION_JOBS = ["사운드", "아트", "경영지원", "데이터분석"]; // 숙련도 1타 가능한 직군
-  
-  const unavailableGroups = groups.map(group => {
-    // 1타 수업 가능 여부: 베테랑이 1명이라도 배정 가능하면 OK
-    // 예외 직군은 숙련도 1타 가능
-    const isExceptionJob = EXCEPTION_JOBS.includes(group.jobCategory);
-    const hasAvailableVeteran = group.consultants.some(c => c.grade === "베테랑" && c.status === "available");
-    const hasAvailableSkilled = isExceptionJob && group.consultants.some(c => c.grade === "숙련" && c.status === "available");
-    const oneTopAvailable = hasAvailableVeteran || hasAvailableSkilled;
+  // 요약 통계
+  const totalCount = consultants.length;
+  const availableCount = consultants.filter(c => c.status === "가능").length;
+  const negotiableCount = consultants.filter(c => c.status === "조율").length;
+  const unavailableCount = consultants.filter(c => c.status === "불가").length;
+  const totalCapacity = consultants
+    .filter(c => c.status === "가능")
+    .reduce((sum, c) => sum + c.capacity, 0);
+
+  // 배정 가능 여부 계산
+  function canTeachGeneral(jobGroup: string, consultantList: ConsultantResource[]): boolean {
+    const isException = EXCEPTION_JOBS.includes(jobGroup);
     
-    // 일반 수업 가능 여부: 숙련 또는 일반이 1명이라도 배정 가능하면 OK
-    const hasAvailableGeneralOrSkilled = group.consultants.some(c => 
-      (c.grade === "숙련" || c.grade === "일반") && c.status === "available"
-    );
-    const generalAvailable = hasAvailableGeneralOrSkilled;
+    if (isException) {
+      // 예외 직군: 숙련 또는 베테랑 중 가능한 사람 1명 이상
+      return consultantList.some(c => 
+        (c.grade === '숙련' || c.grade === '베테랑') && 
+        c.status === '가능'
+      );
+    } else {
+      // 일반 직군: 일반 또는 숙련 중 가능한 사람 1명 이상
+      return consultantList.some(c => 
+        (c.grade === '일반' || c.grade === '숙련') && 
+        c.status === '가능'
+      );
+    }
+  }
+
+  function canTeachOneTier(jobGroup: string, consultantList: ConsultantResource[]): boolean {
+    const isException = EXCEPTION_JOBS.includes(jobGroup);
     
-    return {
-      jobCategory: group.jobCategory,
-      oneTopAvailable,
-      generalAvailable,
-      totalCount: group.totalCount,
-      availableCount: group.availableCount,
-    };
-  }).filter(g => !g.oneTopAvailable || !g.generalAvailable); // 하나라도 불가능한 경우만 표시
+    if (isException) {
+      // 예외 직군: 숙련 또는 베테랑 중 가능한 사람 1명 이상
+      return consultantList.some(c => 
+        (c.grade === '숙련' || c.grade === '베테랑') && 
+        c.status === '가능'
+      );
+    } else {
+      // 일반 직군: 베테랑 중 가능한 사람 1명 이상
+      return consultantList.some(c => 
+        c.grade === '베테랑' && 
+        c.status === '가능'
+      );
+    }
+  }
+
+  // 배정 불가 직군 찾기
+  const unavailableJobs = Object.entries(groupedConsultants)
+    .map(([jobGroup, consultantList]) => {
+      const generalOk = canTeachGeneral(jobGroup, consultantList);
+      const oneTierOk = canTeachOneTier(jobGroup, consultantList);
+      
+      if (!generalOk || !oneTierOk) {
+        return {
+          jobGroup,
+          generalOk,
+          oneTierOk,
+          totalCount: consultantList.length,
+          availableCount: consultantList.filter(c => c.status === "가능").length,
+        };
+      }
+      return null;
+    })
+    .filter(Boolean);
 
   return (
     <div className="space-y-6">
-      <ResourceSummaryCards summary={summary} />
-      
+      {/* 요약 카드 */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              총 인원
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalCount}명</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              배정 가능
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {availableCount}명
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {totalCount > 0 ? ((availableCount / totalCount) * 100).toFixed(1) : 0}%
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              조율 중
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">
+              {negotiableCount}명
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              수용 가능 인원
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">
+              {totalCapacity}명
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* 배정불가 직군 */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">배정불가 직군</CardTitle>
+          <CardTitle className="text-lg">⚠️ 배정불가 직군</CardTitle>
           <CardDescription>1타/일반 수업 가능 여부</CardDescription>
         </CardHeader>
         <CardContent>
-          {unavailableGroups.length === 0 ? (
-            <p className="text-sm text-muted-foreground">모든 직군 1타/일반 수업 가능</p>
+          {unavailableJobs.length === 0 ? (
+            <p className="text-sm text-muted-foreground">✅ 모든 직군 1타/일반 수업 가능</p>
           ) : (
             <div className="space-y-2">
-              {unavailableGroups.map((group) => (
-                <div key={group.jobCategory} className="flex items-center justify-between py-2 px-3 bg-muted/40 rounded">
-                  <span className="font-medium text-sm">{group.jobCategory}</span>
+              {unavailableJobs.map((job) => (
+                <div key={job!.jobGroup} className="flex items-center justify-between py-2 px-3 bg-muted/40 rounded">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm">{job!.jobGroup}</span>
+                    <span className="text-xs text-muted-foreground">
+                      (배정 가능: {job!.availableCount}/{job!.totalCount}명)
+                    </span>
+                  </div>
                   <div className="flex gap-2">
-                    {!group.oneTopAvailable && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs border border-red-200 bg-red-50 text-red-600">
-                        1타 불가
-                      </span>
-                    )}
-                    {!group.generalAvailable && (
+                    {!job!.generalOk && (
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs border border-orange-200 bg-orange-50 text-orange-600">
                         일반 불가
+                      </span>
+                    )}
+                    {!job!.oneTierOk && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs border border-red-200 bg-red-50 text-red-600">
+                        1타 불가
                       </span>
                     )}
                   </div>
@@ -188,9 +295,112 @@ export function ConsultantResourceSection({
           </span>
         </Button>
         
-        {showDetail && <JobCategoryAccordion groups={groups} />}
+        {showDetail && (
+          <Card>
+            <CardContent className="pt-6">
+              <Accordion type="single" collapsible className="w-full">
+                {Object.entries(groupedConsultants).map(([jobGroup, consultantList]) => {
+                  const generalOk = canTeachGeneral(jobGroup, consultantList);
+                  const oneTierOk = canTeachOneTier(jobGroup, consultantList);
+                  const allOk = generalOk && oneTierOk;
+
+                  return (
+                    <AccordionItem key={jobGroup} value={jobGroup}>
+                      <AccordionTrigger value={jobGroup} className="hover:no-underline">
+                        <div className="flex items-center justify-between w-full pr-4">
+                          <div className="flex items-center gap-3">
+                            <span className="text-base font-semibold">
+                              {jobGroup}
+                            </span>
+                            <span className="text-sm text-muted-foreground font-normal">
+                              {consultantList.length}명
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {allOk ? (
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                                ✓ 일반/1타 가능
+                              </span>
+                            ) : (
+                              <>
+                                {!generalOk && (
+                                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+                                    일반 불가
+                                  </span>
+                                )}
+                                {!oneTierOk && (
+                                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200">
+                                    1타 불가
+                                  </span>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent value={jobGroup}>
+                        <div className="space-y-4 pt-3 pb-2">
+                          {/* 등급별 그룹화 */}
+                          {['베테랑', '숙련', '일반'].map((grade) => {
+                            const gradeConsultants = consultantList.filter(c => c.grade === grade);
+                            if (gradeConsultants.length === 0) return null;
+
+                            return (
+                              <div key={grade} className="space-y-2">
+                                <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/30 rounded-md">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                                  <span className="text-sm font-semibold text-foreground">
+                                    {grade}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {gradeConsultants.length}명
+                                  </span>
+                                </div>
+                                <div className="grid gap-2 pl-5">
+                                  {gradeConsultants.map((consultant) => (
+                                    <div
+                                      key={consultant.id}
+                                      className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors"
+                                    >
+                                      <span className="font-medium text-sm">{consultant.consultant_name}</span>
+                                      <div className="flex items-center gap-3">
+                                        {consultant.status === '가능' && (
+                                          <>
+                                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                                              ✓ 가능
+                                            </span>
+                                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                                              수용 {consultant.capacity}명
+                                            </span>
+                                          </>
+                                        )}
+                                        {consultant.status === '조율' && (
+                                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+                                            ◷ 조율 중
+                                          </span>
+                                        )}
+                                        {consultant.status === '불가' && (
+                                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200">
+                                            × 불가
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  );
+                })}
+              </Accordion>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
 }
-

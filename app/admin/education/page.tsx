@@ -4,6 +4,7 @@ import { RevenueUploadForm } from "@/components/education/revenue-upload";
 import { ReportNotes } from "@/components/education/report-notes";
 import { MentoringLogForm } from "@/components/education/mentoring-log-form";
 import { ConsultantResourceUpload } from "@/components/education/consultant-resource-upload";
+import { ConsultantResourceManager } from "@/components/education/consultant-resource-manager";
 import { RevenueBackfill } from "@/components/education/revenue-backfill";
 import { RevenueHistory } from "@/components/education/revenue-history";
 import { MigrationUpload } from "@/components/education/migration-upload";
@@ -34,6 +35,8 @@ export default function EducationPage() {
       <ReportNotes />
 
       <ConsultantResourceUpload />
+      
+      <ConsultantResourceManager />
     </div>
   );
 }

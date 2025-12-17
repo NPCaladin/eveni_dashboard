@@ -142,7 +142,10 @@ export interface Database {
           id: string;
           report_id: string;
           job_group: string;
-          status: "가능" | "불가" | "조율" | "전체마감";
+          consultant_name: string;
+          grade: "일반" | "숙련" | "베테랑";
+          status: "가능" | "불가" | "조율";
+          capacity: number;
           note: string | null;
           created_at: string;
         };
@@ -150,7 +153,10 @@ export interface Database {
           id?: string;
           report_id: string;
           job_group: string;
-          status: "가능" | "불가" | "조율" | "전체마감";
+          consultant_name: string;
+          grade: "일반" | "숙련" | "베테랑";
+          status: "가능" | "불가" | "조율";
+          capacity?: number;
           note?: string | null;
           created_at?: string;
         };
@@ -158,7 +164,10 @@ export interface Database {
           id?: string;
           report_id?: string;
           job_group?: string;
-          status?: "가능" | "불가" | "조율" | "전체마감";
+          consultant_name?: string;
+          grade?: "일반" | "숙련" | "베테랑";
+          status?: "가능" | "불가" | "조율";
+          capacity?: number;
           note?: string | null;
           created_at?: string;
         };

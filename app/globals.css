@@ -58,6 +58,26 @@
   }
 }
 
+/* ContentEditable 에디터 및 대시보드 내 이미지 크기 제한 */
+[contentEditable="true"] img,
+.prose img {
+  max-width: 100% !important;
+  max-height: 400px !important;
+  height: auto !important;
+  margin: 8px 0 !important;
+  border-radius: 4px !important;
+  object-fit: contain !important;
+}
+
+/* ContentEditable placeholder */
+[contentEditable="true"]:empty:before {
+  content: attr(data-placeholder);
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+}
+
+
+
 
 
 
