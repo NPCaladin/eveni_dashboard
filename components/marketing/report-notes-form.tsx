@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-export function ReportNotes() {
+export function MarketingReportNotes() {
   const { reportId } = useWeeklyReport();
   const { toast } = useToast();
   const editorRef = useRef<HTMLDivElement>(null);
@@ -71,24 +71,24 @@ export function ReportNotes() {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from("edu_report_notes")
+        .from("mkt_report_notes")
         .select("content")
         .eq("report_id", reportId)
-        .order("updated_at", { ascending: false })
-        .limit(1)
         .maybeSingle();
-      if (error) {
-        // 테이블 미존재 등 스키마 캐시 에러를 사용자 메시지로 노출
+      
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 = no rows returned (데이터가 없는 경우)
         console.error("load report notes error", error);
         toast({
           title: "오류",
-          description: "보고사항을 불러오지 못했습니다. (테이블 생성 여부를 확인하세요)",
+          description: "보고사항을 불러오지 못했습니다.",
           variant: "destructive",
         });
         return;
       }
+      
       if (editorRef.current) {
-        editorRef.current.innerHTML = data?.content || "";
+        editorRef.current.innerHTML = (data as any)?.content || "";
       }
     } catch (error) {
       console.error("load report notes error", error);
@@ -114,10 +114,19 @@ export function ReportNotes() {
     setSaving(true);
     try {
       const content = editorRef.current?.innerHTML || "";
-      const { error } = await supabase.from("edu_report_notes").upsert({
-        report_id: reportId,
-        content,
-      });
+      
+      // upsert with onConflict (now works because unique constraint exists)
+      const { error } = await supabase.from("mkt_report_notes").upsert(
+        {
+          report_id: reportId,
+          content,
+        },
+        {
+          onConflict: 'report_id',
+          ignoreDuplicates: false
+        }
+      );
+      
       if (error) throw error;
       toast({ title: "저장 완료", description: "보고 사항이 저장되었습니다." });
     } catch (error: any) {
@@ -135,7 +144,7 @@ export function ReportNotes() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>보고 사항</CardTitle>
+        <CardTitle>기타 보고 사항</CardTitle>
         <CardDescription>
           텍스트(볼드/컬러/크기), 테이블, 이미지 붙여넣기 지원.
         </CardDescription>
