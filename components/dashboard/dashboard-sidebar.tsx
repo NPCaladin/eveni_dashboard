@@ -14,7 +14,7 @@ import {
 const menuItems = [
   { href: "/dashboard", label: "전체보기", icon: LayoutDashboard },
   { href: "/dashboard?tab=management", label: "경영혁신실", icon: Building2 },
-  { href: "/dashboard?tab=marketing", label: "마케팅본부", icon: Megaphone },
+  { href: "/dashboard/marketing", label: "마케팅본부", icon: Megaphone },
   { href: "/dashboard/sales", label: "교육사업본부", icon: GraduationCap },
   { href: "/dashboard?tab=sales", label: "세일즈본부", icon: Users },
 ];
@@ -42,6 +42,11 @@ export function DashboardSidebar() {
     // /dashboard/sales는 교육사업본부로 특별 처리
     if (href === "/dashboard/sales") {
       return currentPath === "/dashboard/sales";
+    }
+    
+    // /dashboard/marketing은 마케팅본부로 특별 처리
+    if (href === "/dashboard/marketing") {
+      return currentPath === "/dashboard/marketing";
     }
     
     // /dashboard 페이지의 경우 탭 비교
