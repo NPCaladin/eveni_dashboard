@@ -567,24 +567,67 @@ export default function SalesDashboardPage() {
             for (let i = 0; i < sortedReports.length; i++) {
               const report = sortedReports[i];
               
-              // edu_revenue_stats에서 순매출, 실매출 데이터 가져오기
-              const { data: revenueStats } = await supabase
-                .from("edu_revenue_stats")
+              // 2025년 결제 데이터 (payment_date 기준)
+              const { data: payments2025 } = await supabase
+                .from("sales_transactions")
                 .select("*")
-                .eq("report_id", report.id)
-                .in("category", ["실매출", "순매출"]);
+                .gte("payment_date", report.start_date)
+                .lte("payment_date", report.end_date)
+                .eq("status", "결");
 
-              const netRevenueRow = revenueStats?.find(r => r.category === "순매출");
-              const grossRevenueRow = revenueStats?.find(r => r.category === "실매출");
+              // 2025년 환불 데이터 (refund_date 기준)
+              const { data: refunds2025 } = await supabase
+                .from("sales_transactions")
+                .select("*")
+                .gte("refund_date", report.start_date)
+                .lte("refund_date", report.end_date)
+                .gt("refund_amount", 0);
 
-              const netRevenue = netRevenueRow?.weekly_amt || 0;
-              const grossRevenue = grossRevenueRow?.weekly_amt || 0;
-              const refundAmount = grossRevenue - netRevenue;
+              // 실매출 (결제)
+              const grossRevenue = payments2025
+                ?.reduce((sum: number, tx: any) => sum + (tx.payment_amount || 0), 0) || 0;
 
-              // 전년 동기 데이터 (yoy_amt 사용)
-              const netRevenue2024 = netRevenueRow?.yoy_amt || 0;
+              // 환불 금액
+              const refundAmount = refunds2025
+                ?.reduce((sum: number, tx: any) => sum + (tx.refund_amount || 0), 0) || 0;
+
+              // 순매출
+              const netRevenue = grossRevenue - refundAmount;
+
+              // 전년 동기 데이터 (2024년)
+              const startDate2024 = new Date(report.start_date);
+              startDate2024.setFullYear(startDate2024.getFullYear() - 1);
+              const endDate2024 = new Date(report.end_date);
+              endDate2024.setFullYear(endDate2024.getFullYear() - 1);
+
+              // 2024년 결제 데이터
+              const { data: payments2024 } = await supabase
+                .from("sales_transactions")
+                .select("*")
+                .gte("payment_date", formatDate(startDate2024))
+                .lte("payment_date", formatDate(endDate2024))
+                .eq("status", "결");
+
+              // 2024년 환불 데이터
+              const { data: refunds2024 } = await supabase
+                .from("sales_transactions")
+                .select("*")
+                .gte("refund_date", formatDate(startDate2024))
+                .lte("refund_date", formatDate(endDate2024))
+                .gt("refund_amount", 0);
+
+              const grossRevenue2024 = payments2024
+                ?.reduce((sum: number, tx: any) => sum + (tx.payment_amount || 0), 0) || 0;
+
+              const refundAmount2024 = refunds2024
+                ?.reduce((sum: number, tx: any) => sum + (tx.refund_amount || 0), 0) || 0;
+
+              const netRevenue2024 = grossRevenue2024 - refundAmount2024;
 
               const weekLabel = report.title || `W${i + 1}`;
+              
+              console.log(`📊 ${weekLabel}: 결제=${payments2025?.length || 0}건, 환불=${refunds2025?.length || 0}건, 실매출=${grossRevenue}원, 환불액=${refundAmount}원, 순매출=${netRevenue}원`);
+              
               weeklyData.push({
                 label: weekLabel,
                 netRevenue2025: netRevenue,
@@ -610,6 +653,8 @@ export default function SalesDashboardPage() {
               monthData.netRevenue2024 += netRevenue2024;
               monthData.refund += refundAmount;
             }
+
+            console.log("📊 매출 추이 데이터 생성 완료:", weeklyData.length, "주");
 
             return {
               weeklyData,
