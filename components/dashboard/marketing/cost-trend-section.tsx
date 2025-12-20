@@ -141,11 +141,11 @@ export function CostTrendSection({ data }: CostTrendSectionProps) {
               </thead>
               <tbody>
                 {tableData.map((week, index) => {
-                  const meta = week.costs.find((c: any) => c.media === "메타");
-                  const kakao = week.costs.find((c: any) => c.media === "카카오");
+                  const metaSpend = week.totalSpends?.find((t: any) => t.media === "메타");
+                  const kakaoSpend = week.totalSpends?.find((t: any) => t.media === "카카오");
                   
-                  const metaCost = (meta?.stage_1_cost || 0) + (meta?.stage_2_cost || 0);
-                  const kakaoCost = (kakao?.stage_1_cost || 0) + (kakao?.stage_2_cost || 0);
+                  const metaCost = metaSpend?.total_spend || 0;
+                  const kakaoCost = kakaoSpend?.total_spend || 0;
                   const total = metaCost + kakaoCost;
 
                   return (

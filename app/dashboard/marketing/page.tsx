@@ -15,6 +15,7 @@ export default function MarketingDashboardPage() {
   const { reportId, currentReport } = useWeeklyReport();
   const [loading, setLoading] = useState(true);
   const [adOverviewData, setAdOverviewData] = useState<any[]>([]);
+  const [adOverviewNotes, setAdOverviewNotes] = useState<string>("");
   const [costTrendData, setCostTrendData] = useState<any[]>([]);
   const [dbCountTrendData, setDbCountTrendData] = useState<any[]>([]);
   const [reportNotes, setReportNotes] = useState<string>("");
@@ -42,6 +43,14 @@ export default function MarketingDashboardPage() {
           .eq("report_id", reportId);
         setAdOverviewData(adData || []);
 
+        // 1-1. 광고 현황 인사이트
+        const { data: adNotesData } = await supabase
+          .from("mkt_ad_overview_notes")
+          .select("content")
+          .eq("report_id", reportId)
+          .maybeSingle();
+        setAdOverviewNotes((adNotesData as any)?.content || "");
+
         // 2. 최근 3주 보고서 가져오기
         const { data: recentReports } = await supabase
           .from("weekly_reports")
@@ -51,17 +60,26 @@ export default function MarketingDashboardPage() {
           .limit(3);
 
         if (recentReports) {
-          // 비용 추이 (최근 3주)
+          // 비용 추이 (최근 3주) - mkt_cost_trend + mkt_ad_overview (total_spend)
           const costPromises = recentReports.map((report) =>
             supabase
               .from("mkt_cost_trend")
               .select("*")
               .eq("report_id", report.id)
           );
+          const adOverviewForCostPromises = recentReports.map((report) =>
+            supabase
+              .from("mkt_ad_overview")
+              .select("media, total_spend")
+              .eq("report_id", report.id)
+          );
           const costResults = await Promise.all(costPromises);
+          const adOverviewForCostResults = await Promise.all(adOverviewForCostPromises);
+          
           const costData = recentReports.map((report, index) => ({
             ...report,
             costs: costResults[index].data || [],
+            totalSpends: adOverviewForCostResults[index].data || [],
           }));
           setCostTrendData(costData);
 
@@ -121,7 +139,7 @@ export default function MarketingDashboardPage() {
                   <h2 className="text-2xl font-bold mb-6 text-slate-800">
                     📊 광고비 데이터 - 개요
                   </h2>
-                  <AdOverviewSection data={adOverviewData} />
+                  <AdOverviewSection data={adOverviewData} notes={adOverviewNotes} />
                 </section>
 
                 {/* 2. 비용 추이 */}

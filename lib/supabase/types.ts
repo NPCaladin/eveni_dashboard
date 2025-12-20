@@ -452,6 +452,29 @@ export interface Database {
           updated_at?: string;
         };
       };
+      mkt_ad_overview_notes: {
+        Row: {
+          id: string;
+          report_id: string;
+          content: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          report_id: string;
+          content?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          report_id?: string;
+          content?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
   };
 }

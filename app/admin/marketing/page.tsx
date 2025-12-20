@@ -1,6 +1,7 @@
 "use client";
 
 import { AdOverviewForm } from "@/components/marketing/ad-overview-form";
+import { AdOverviewNotesForm } from "@/components/marketing/ad-overview-notes-form";
 import { TrendDataForm } from "@/components/marketing/trend-data-form";
 import { MarketingReportNotes } from "@/components/marketing/report-notes-form";
 
@@ -16,6 +17,9 @@ export default function MarketingAdminPage() {
 
       {/* 1. 광고비 데이터 - 개요 */}
       <AdOverviewForm />
+
+      {/* 1-1. 광고 현황 인사이트 */}
+      <AdOverviewNotesForm />
 
       {/* 2. 비용 추이 & 3. DB개수 추이 */}
       <TrendDataForm />
