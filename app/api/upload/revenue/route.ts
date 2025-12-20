@@ -319,11 +319,11 @@ export async function POST(request: NextRequest) {
 
         // 상태 확인 (필수)
         const statusRaw = String(rowData.status || "").trim();
-        if (!statusRaw || (statusRaw !== "결" && statusRaw !== "환" && statusRaw !== "미" && statusRaw !== "프")) {
+        if (!statusRaw || (statusRaw !== "결" && statusRaw !== "환" && statusRaw !== "미" && statusRaw !== "프" && statusRaw !== "재")) {
           continue;
         }
-        // "프" (프로모션 재결제)는 "결"로 처리
-        const status = statusRaw === "프" ? "결" : statusRaw;
+        // "프" (프로모션 재결제), "재" (재결제/결제 수단 변경)는 "결"로 처리
+        const status = (statusRaw === "프" || statusRaw === "재") ? "결" : statusRaw;
 
         // 필수 필드 확인
         const sellerName = String(rowData.seller || "").trim();
@@ -783,9 +783,9 @@ export async function POST(request: NextRequest) {
       weekly_amt: revenueReal,
       prev_weekly_amt: prevWeeklyRealAmt,
       yoy_amt: yoyRealAmt,
-      monthly_cum_amt: monthlyCumRealAmt,
+      monthly_cum: monthlyCumRealAmt,
       monthly_refund_amt: totalRefundAmount,
-      yearly_cum_amt: yearlyCumRealAmt,
+      yearly_cum: yearlyCumRealAmt,
     };
 
     if (existingRevenueReal) {
@@ -808,9 +808,9 @@ export async function POST(request: NextRequest) {
       weekly_amt: revenueNet,
       prev_weekly_amt: prevWeeklyNetAmt,
       yoy_amt: yoyNetAmt,
-      monthly_cum_amt: monthlyCumNetAmt,
+      monthly_cum: monthlyCumNetAmt,
       monthly_refund_amt: totalRefundAmount,
-      yearly_cum_amt: yearlyCumNetAmt,
+      yearly_cum: yearlyCumNetAmt,
     };
 
     if (existingRevenueNet) {

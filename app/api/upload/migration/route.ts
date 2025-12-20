@@ -188,9 +188,9 @@ export async function POST(request: NextRequest) {
 
       // 필수: 날짜, 상태
       const statusRaw = String(rowData.status || "").trim();
-      if (statusRaw !== "결" && statusRaw !== "환" && statusRaw !== "미" && statusRaw !== "프") continue;
-      // "프" (프로모션 재결제)는 "결"로 처리
-      const status = (statusRaw === "프" ? "결" : statusRaw) as "결" | "환" | "미";
+      if (statusRaw !== "결" && statusRaw !== "환" && statusRaw !== "미" && statusRaw !== "프" && statusRaw !== "재") continue;
+      // "프" (프로모션 재결제), "재" (재결제)는 "결"로 처리
+      const status = (statusRaw === "프" || statusRaw === "재" ? "결" : statusRaw) as "결" | "환" | "미";
 
       // 날짜
       let paymentDate: string;
@@ -290,7 +290,17 @@ export async function POST(request: NextRequest) {
       }
 
       // transactions insert: 기존 삭제 후 batch insert
-      await supabase.from("sales_transactions").delete().eq("report_id", reportId);
+      console.log(`🗑️  삭제 시작: report_id=${reportId}`);
+      const { data: deletedData, error: deleteError } = await supabase
+        .from("sales_transactions")
+        .delete()
+        .eq("report_id", reportId);
+      
+      if (deleteError) {
+        console.error("❌ 삭제 실패:", deleteError);
+      } else {
+        console.log(`✅ 삭제 완료`);
+      }
 
       const txPayload = rows.map((r) => {
         const { category, week } = parseProductInfo(r.product_name);
@@ -338,12 +348,14 @@ export async function POST(request: NextRequest) {
         };
       });
 
+      console.log(`📝 삽입 시작: ${txPayload.length}건`);
       for (const batch of chunk(txPayload, 300)) {
         const { error: insertError } = await supabase.from("sales_transactions").insert(batch);
         if (insertError) {
-          console.error("insert tx error", insertError);
+          console.error("❌ 삽입 실패:", insertError);
           return NextResponse.json({ error: insertError.message }, { status: 500 });
         }
+        console.log(`✅ 배치 삽입 완료: ${batch.length}건`);
       }
 
       // 집계
