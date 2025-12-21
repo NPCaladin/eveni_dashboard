@@ -297,3 +297,5 @@ COMMIT; -- 또는 ROLLBACK;
 -- COMMIT 후면:
 -- Step 1의 백업 데이터를 사용하여 수동 복구 필요
 
+
+

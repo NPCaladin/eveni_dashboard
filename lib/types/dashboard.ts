@@ -39,6 +39,25 @@ export interface AdOverviewData {
   total_spend: number;
 }
 
+export interface ConversionTrendData {
+  reportId: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  kakao: {
+    stage1Count: number;
+    stage2Count: number;
+    conversionRate: number;
+    totalSpend: number;
+  };
+  meta: {
+    stage1Count: number;
+    stage2Count: number;
+    conversionRate: number;
+    totalSpend: number;
+  };
+}
+
 // ============================================
 // 세일즈 대시보드 타입
 // ============================================
@@ -177,4 +196,6 @@ export interface PeriodData {
   changeFromPrevious: number;
   changeFromPreviousYear: number;
 }
+
+
 

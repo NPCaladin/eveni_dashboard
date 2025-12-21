@@ -126,3 +126,7 @@ async function calculateWeek1Revenue() {
 
 calculateWeek1Revenue().catch(console.error);
 
+
+
+
+

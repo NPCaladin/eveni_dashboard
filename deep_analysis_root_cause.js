@@ -173,3 +173,5 @@ dataRows.forEach(row => {
 console.log(`예상 실매출: ${totalAmount.toLocaleString()}원`);
 console.log('\n' + '='.repeat(80));
 
+
+

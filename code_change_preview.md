@@ -282,3 +282,5 @@ git checkout HEAD -- app/dashboard/sales/page.tsx
 4. **확인**: 정확성 검증
 5. **Phase 2**: 비교 데이터 (선택)
 
+
+

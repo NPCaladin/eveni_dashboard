@@ -64,3 +64,5 @@ BEGIN
   RAISE NOTICE '   - 인덱스 추가 완료';
 END $$;
 
+
+

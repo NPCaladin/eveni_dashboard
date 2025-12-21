@@ -36,3 +36,5 @@ BEGIN
   RAISE NOTICE '   - Public 접근 가능';
 END $$;
 
+
+

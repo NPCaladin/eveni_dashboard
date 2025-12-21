@@ -17,3 +17,5 @@ BEGIN
   RAISE NOTICE '✅ 경영혁신실 보고 테이블에 image_url 컬럼 추가 완료';
 END $$;
 
+
+

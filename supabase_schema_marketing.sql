@@ -117,3 +117,5 @@ CREATE POLICY "Enable update access for all users" ON mkt_report_notes
 CREATE POLICY "Enable delete access for all users" ON mkt_report_notes
     FOR DELETE USING (true);
 
+
+

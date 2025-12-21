@@ -172,3 +172,5 @@ UNIQUE (report_id, payment_date, buyer, product_name);
 
 **예상 소요 시간**: 30분 (코드 수정 + DB 정리 + 테스트)
 
+
+

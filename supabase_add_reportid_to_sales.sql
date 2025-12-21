@@ -13,3 +13,7 @@ COMMENT ON COLUMN sales_transactions.report_id IS '주간 보고서 ID - 어느 
 -- 기존 데이터의 report_id는 NULL로 남습니다
 -- 새로 업로드되는 데이터부터 report_id가 설정됩니다
 
+
+
+
+

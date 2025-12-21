@@ -76,3 +76,7 @@ Write-Host "✅ 압축 완료!" -ForegroundColor Green
 Write-Host "파일 위치: $zipPath" -ForegroundColor Cyan
 Write-Host "파일 크기: $([math]::Round((Get-Item $zipPath).Length / 1MB, 2)) MB" -ForegroundColor Cyan
 
+
+
+
+

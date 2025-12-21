@@ -63,3 +63,5 @@ console.log(`엑셀 실매출: ${totalPayments.toLocaleString()}원`);
 console.log(`대시보드 실매출: ${dashboardAmount.toLocaleString()}원`);
 console.log(`차이: ${(totalPayments - dashboardAmount).toLocaleString()}원`);
 
+
+
