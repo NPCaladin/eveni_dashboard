@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import type { ConversionTrendData } from "@/lib/types/dashboard";
 import type { PeriodType } from "./global-period-filter";
 import { formatWeekLabel, getFilteredDataByPeriod, formatNumber } from "@/lib/utils/chart";
@@ -21,19 +22,43 @@ interface DbVolumeTrendChartProps {
   period: PeriodType;
 }
 
+type ViewMode = "first" | "consulting";
+
 export function DbVolumeTrendChart({ data, period }: DbVolumeTrendChartProps) {
-  // 차트 데이터 준비 (DB 유입 데이터 추출)
+  // 토글 상태 관리
+  const [viewMode, setViewMode] = useState<ViewMode>("first");
+  // 차트 데이터 준비 (viewMode에 따라 다른 데이터 사용)
   const chartData = useMemo(() => {
     const filteredData = getFilteredDataByPeriod(data, period);
     
-    return filteredData.map((item) => ({
-      week: formatWeekLabel(item.startDate, item.title),
-      fullTitle: item.title,
-      kakaoDb: item.kakao.stage1Count,
-      metaDb: item.meta.stage1Count,
-      totalDb: item.kakao.stage1Count + item.meta.stage1Count,
-    }));
-  }, [data, period]);
+    return filteredData.map((item) => {
+      if (viewMode === "first") {
+        // 1차 DB
+        return {
+          week: formatWeekLabel(item.startDate, item.title),
+          fullTitle: item.title,
+          kakaoDb: item.kakao.stage1Count,
+          metaDb: item.meta.stage1Count,
+          totalDb: item.kakao.stage1Count + item.meta.stage1Count,
+        };
+      } else {
+        // 상담 DB
+        return {
+          week: formatWeekLabel(item.startDate, item.title),
+          fullTitle: item.title,
+          kakaoDb: item.kakao.stage2Count,
+          metaDb: item.meta.stage2Count,
+          totalDb: item.kakao.stage2Count + item.meta.stage2Count,
+        };
+      }
+    });
+  }, [data, period, viewMode]);
+
+  // 총합 색상 (viewMode에 따라 변경)
+  const totalColor = viewMode === "first" ? "#10B981" : "#8B5CF6";
+  
+  // Y축 레이블
+  const yAxisLabel = viewMode === "first" ? "1차 DB 수 (건)" : "상담 DB 수 (건)";
 
   // 커스텀 툴팁
   const CustomTooltip = ({ active, payload }: any) => {
@@ -60,7 +85,10 @@ export function DbVolumeTrendChart({ data, period }: DbVolumeTrendChartProps) {
             </span>
           </div>
           <div className="flex items-center gap-2 pt-1 border-t border-slate-200 mt-1">
-            <div className="w-3 h-3 rounded-full bg-[#10B981]" />
+            <div 
+              className="w-3 h-3 rounded-full" 
+              style={{ backgroundColor: totalColor }}
+            />
             <span className="text-slate-700 font-semibold">총합:</span>
             <span className="font-bold text-slate-900">
               {formatNumber(data.totalDb)}건
@@ -84,12 +112,37 @@ export function DbVolumeTrendChart({ data, period }: DbVolumeTrendChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl font-bold text-slate-900">
-          📊 주차별 DB 유입 추이
-        </CardTitle>
-        <p className="text-sm text-slate-600 mt-1">
-          매체별 1차 DB 유입 현황 (라인 차트)
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-xl font-bold text-slate-900">
+              📊 주차별 DB 유입 추이
+            </CardTitle>
+            <p className="text-sm text-slate-600 mt-1">
+              {viewMode === "first" 
+                ? "매체별 1차 DB 유입 현황" 
+                : "매체별 상담 DB 전환 현황"}
+            </p>
+          </div>
+          {/* 토글 버튼 */}
+          <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
+            <Button
+              variant={viewMode === "first" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("first")}
+              className="h-8 px-3 text-xs"
+            >
+              1차 DB
+            </Button>
+            <Button
+              variant={viewMode === "consulting" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("consulting")}
+              className="h-8 px-3 text-xs"
+            >
+              상담 DB
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
@@ -110,7 +163,7 @@ export function DbVolumeTrendChart({ data, period }: DbVolumeTrendChartProps) {
               stroke="#64748b"
               style={{ fontSize: "12px" }}
               label={{
-                value: "DB 수 (건)",
+                value: yAxisLabel,
                 angle: -90,
                 position: "insideLeft",
                 style: { fontSize: "14px", fill: "#64748b" },
@@ -135,6 +188,8 @@ export function DbVolumeTrendChart({ data, period }: DbVolumeTrendChartProps) {
               dot={{ fill: "#FEE500", r: 4 }}
               activeDot={{ r: 6 }}
               name="kakaoDb"
+              isAnimationActive={true}
+              animationDuration={500}
             />
             <Line
               type="monotone"
@@ -144,15 +199,19 @@ export function DbVolumeTrendChart({ data, period }: DbVolumeTrendChartProps) {
               dot={{ fill: "#0668E1", r: 4 }}
               activeDot={{ r: 6 }}
               name="metaDb"
+              isAnimationActive={true}
+              animationDuration={500}
             />
             <Line
               type="monotone"
               dataKey="totalDb"
-              stroke="#10B981"
+              stroke={totalColor}
               strokeWidth={3}
               dot={false}
-              activeDot={{ r: 6, stroke: "#10B981", strokeWidth: 2, fill: "#fff" }}
+              activeDot={{ r: 6, stroke: totalColor, strokeWidth: 2, fill: "#fff" }}
               name="totalDb"
+              isAnimationActive={true}
+              animationDuration={500}
             />
           </LineChart>
         </ResponsiveContainer>
