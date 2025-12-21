@@ -10,14 +10,15 @@ import { AdOverviewSection } from "@/components/dashboard/marketing/ad-overview-
 import { CostTrendSection } from "@/components/dashboard/marketing/cost-trend-section";
 import { DbCountTrendSection } from "@/components/dashboard/marketing/db-count-trend-section";
 import { MarketingNotesSection } from "@/components/dashboard/marketing/notes-section";
+import type { AdOverviewData, WeekData } from "@/lib/types/dashboard";
 
 export default function MarketingDashboardPage() {
   const { reportId, currentReport } = useWeeklyReport();
   const [loading, setLoading] = useState(true);
-  const [adOverviewData, setAdOverviewData] = useState<any[]>([]);
+  const [adOverviewData, setAdOverviewData] = useState<AdOverviewData[]>([]);
   const [adOverviewNotes, setAdOverviewNotes] = useState<string>("");
-  const [costTrendData, setCostTrendData] = useState<any[]>([]);
-  const [dbCountTrendData, setDbCountTrendData] = useState<any[]>([]);
+  const [costTrendData, setCostTrendData] = useState<WeekData[]>([]);
+  const [dbCountTrendData, setDbCountTrendData] = useState<WeekData[]>([]);
   const [reportNotes, setReportNotes] = useState<string>("");
 
   useEffect(() => {

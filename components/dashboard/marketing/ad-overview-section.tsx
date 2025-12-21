@@ -2,6 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { formatCurrency, formatPercent } from "@/lib/utils/format";
 
 interface AdOverviewData {
   media: string;
@@ -56,7 +57,7 @@ export function AdOverviewSection({ data, notes }: AdOverviewSectionProps) {
                         {item.stage_1_count}명
                       </td>
                       <td className="border border-gray-300 px-4 py-3 text-center">
-                        {item.stage_1_cost_per_lead.toLocaleString()}원
+                        {formatCurrency(item.stage_1_cost_per_lead)}
                       </td>
                     </tr>
                     <tr className="bg-blue-50">
@@ -64,10 +65,10 @@ export function AdOverviewSection({ data, notes }: AdOverviewSectionProps) {
                         {item.stage_2_name || "상담 신청"}
                       </td>
                       <td className="border border-gray-300 px-4 py-3 text-center font-semibold">
-                        {item.stage_2_count}명 ({item.stage_2_conversion_rate}%)
+                        {item.stage_2_count}명 ({formatPercent(item.stage_2_conversion_rate || 0)})
                       </td>
                       <td className="border border-gray-300 px-4 py-3 text-center">
-                        {item.stage_2_cost_per_lead.toLocaleString()}원
+                        {formatCurrency(item.stage_2_cost_per_lead)}
                       </td>
                     </tr>
                     <tr className="bg-white">
@@ -75,7 +76,7 @@ export function AdOverviewSection({ data, notes }: AdOverviewSectionProps) {
                         지출
                       </td>
                       <td className="border border-gray-300 px-4 py-3 text-center font-semibold text-blue-700">
-                        {item.total_spend.toLocaleString()}원
+                        {formatCurrency(item.total_spend)}
                       </td>
                     </tr>
                   </tbody>

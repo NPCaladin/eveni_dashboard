@@ -12,9 +12,27 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { formatChartCurrency, formatTooltipCurrency } from "@/lib/utils/format";
+
+interface MediaCost {
+  media: string;
+  stage_1_cost?: number;
+  stage_2_cost?: number;
+}
+
+interface TotalSpend {
+  media: string;
+  total_spend: number;
+}
+
+interface WeekData {
+  title: string;
+  costs: MediaCost[];
+  totalSpends?: TotalSpend[];
+}
 
 interface CostTrendSectionProps {
-  data: any[];
+  data: WeekData[];
 }
 
 export function CostTrendSection({ data }: CostTrendSectionProps) {
@@ -28,8 +46,8 @@ export function CostTrendSection({ data }: CostTrendSectionProps) {
 
   // 차트 데이터 준비 (오래된 주차부터 → 최근 주차가 오른쪽에 표시)
   const chartData = [...data].reverse().map((week) => {
-    const meta = week.costs.find((c: any) => c.media === "메타");
-    const kakao = week.costs.find((c: any) => c.media === "카카오");
+    const meta = week.costs.find((c) => c.media === "메타");
+    const kakao = week.costs.find((c) => c.media === "카카오");
 
     return {
       label: week.title,
@@ -42,17 +60,6 @@ export function CostTrendSection({ data }: CostTrendSectionProps) {
 
   // 테이블 데이터 준비 (최근 주차부터)
   const tableData = [...data].reverse();
-
-  const formatCurrency = (value: number) => {
-    if (value >= 10000) {
-      return `${(value / 10000).toFixed(0)}만`;
-    }
-    return value.toLocaleString();
-  };
-
-  const formatTooltip = (value: number) => {
-    return `${value.toLocaleString()}원`;
-  };
 
   return (
     <div className="space-y-6">
@@ -67,8 +74,8 @@ export function CostTrendSection({ data }: CostTrendSectionProps) {
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="label" />
-                  <YAxis tickFormatter={formatCurrency} />
-                  <Tooltip formatter={formatTooltip} />
+                  <YAxis tickFormatter={formatChartCurrency} />
+                  <Tooltip formatter={formatTooltipCurrency} />
                   <Legend />
                   <Line
                     type="monotone"
@@ -97,8 +104,8 @@ export function CostTrendSection({ data }: CostTrendSectionProps) {
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="label" />
-                  <YAxis tickFormatter={formatCurrency} />
-                  <Tooltip formatter={formatTooltip} />
+                  <YAxis tickFormatter={formatChartCurrency} />
+                  <Tooltip formatter={formatTooltipCurrency} />
                   <Legend />
                   <Line
                     type="monotone"
@@ -141,8 +148,8 @@ export function CostTrendSection({ data }: CostTrendSectionProps) {
               </thead>
               <tbody>
                 {tableData.map((week, index) => {
-                  const metaSpend = week.totalSpends?.find((t: any) => t.media === "메타");
-                  const kakaoSpend = week.totalSpends?.find((t: any) => t.media === "카카오");
+                  const metaSpend = week.totalSpends?.find((t) => t.media === "메타");
+                  const kakaoSpend = week.totalSpends?.find((t) => t.media === "카카오");
                   
                   const metaCost = metaSpend?.total_spend || 0;
                   const kakaoCost = kakaoSpend?.total_spend || 0;
