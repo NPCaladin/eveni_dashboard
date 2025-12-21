@@ -27,6 +27,17 @@ export function DbCountTrendSection({ data }: DbCountTrendSectionProps) {
     );
   }
 
+  // 날짜 포맷팅 함수 (YYYY-MM-DD → MM.DD)
+  const formatDateRange = (startDate: string, endDate: string) => {
+    const formatDate = (dateStr: string) => {
+      const date = new Date(dateStr);
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      return `${month}.${day.toString().padStart(2, '0')}`;
+    };
+    return `${formatDate(startDate)}~${formatDate(endDate)}`;
+  };
+
   // 차트 데이터 준비 (오래된 주차부터 → 최근 주차가 오른쪽에 표시)
   const chartData = [...data].reverse().map((week) => {
     const meta = week.adData?.find((c: any) => c.media === "메타");
@@ -124,21 +135,21 @@ export function DbCountTrendSection({ data }: DbCountTrendSectionProps) {
               <thead>
                 <tr className="bg-blue-600 text-white">
                   <th className="border border-gray-300 px-4 py-3 text-center" rowSpan={2}>구분</th>
-                  <th className="border border-gray-300 px-4 py-3 text-center" colSpan={3}>11.17~11.23</th>
-                  <th className="border border-gray-300 px-4 py-3 text-center" colSpan={3}>11.24~11.30</th>
-                  <th className="border border-gray-300 px-4 py-3 text-center" colSpan={3}>12.01~12.07</th>
+                  {tableData.map((week, idx) => (
+                    <th key={`header-${week.id || idx}`} className="border border-gray-300 px-4 py-3 text-center" colSpan={3}>
+                      {formatDateRange(week.start_date, week.end_date)}
+                    </th>
+                  ))}
                   <th className="border border-gray-300 px-4 py-3 text-center">평균</th>
                 </tr>
                 <tr className="bg-blue-500 text-white">
-                  <th className="border border-gray-300 px-2 py-2 text-center text-sm">메타</th>
-                  <th className="border border-gray-300 px-2 py-2 text-center text-sm">카카오</th>
-                  <th className="border border-gray-300 px-2 py-2 text-center text-sm">총합</th>
-                  <th className="border border-gray-300 px-2 py-2 text-center text-sm">메타</th>
-                  <th className="border border-gray-300 px-2 py-2 text-center text-sm">카카오</th>
-                  <th className="border border-gray-300 px-2 py-2 text-center text-sm">총합</th>
-                  <th className="border border-gray-300 px-2 py-2 text-center text-sm">메타</th>
-                  <th className="border border-gray-300 px-2 py-2 text-center text-sm">카카오</th>
-                  <th className="border border-gray-300 px-2 py-2 text-center text-sm">총합</th>
+                  {tableData.map((week, idx) => (
+                    <React.Fragment key={`subheader-${week.id || idx}`}>
+                      <th className="border border-gray-300 px-2 py-2 text-center text-sm">메타</th>
+                      <th className="border border-gray-300 px-2 py-2 text-center text-sm">카카오</th>
+                      <th className="border border-gray-300 px-2 py-2 text-center text-sm">총합</th>
+                    </React.Fragment>
+                  ))}
                   <th className="border border-gray-300 px-2 py-2 text-center text-sm">전환율</th>
                 </tr>
               </thead>
