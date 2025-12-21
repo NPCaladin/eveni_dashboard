@@ -1,120 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useWeeklyReport } from "@/hooks/use-weekly-report";
-import { supabase } from "@/lib/supabase/client";
+import { useMarketingData } from "@/hooks/use-marketing-data";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AdOverviewSection } from "@/components/dashboard/marketing/ad-overview-section";
 import { CostTrendSection } from "@/components/dashboard/marketing/cost-trend-section";
 import { DbCountTrendSection } from "@/components/dashboard/marketing/db-count-trend-section";
 import { MarketingNotesSection } from "@/components/dashboard/marketing/notes-section";
-import type { AdOverviewData, WeekData } from "@/lib/types/dashboard";
 
 export default function MarketingDashboardPage() {
   const { reportId, currentReport } = useWeeklyReport();
-  const [loading, setLoading] = useState(true);
-  const [adOverviewData, setAdOverviewData] = useState<AdOverviewData[]>([]);
-  const [adOverviewNotes, setAdOverviewNotes] = useState<string>("");
-  const [costTrendData, setCostTrendData] = useState<WeekData[]>([]);
-  const [dbCountTrendData, setDbCountTrendData] = useState<WeekData[]>([]);
-  const [reportNotes, setReportNotes] = useState<string>("");
-
-  useEffect(() => {
-    if (!reportId) {
-      setLoading(false);
-      return;
-    }
-
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        // 현재 보고서의 start_date가 없으면 중단
-        if (!currentReport?.start_date) {
-          console.log("currentReport.start_date is missing");
-          setLoading(false);
-          return;
-        }
-
-        // 1. 광고비 개요 (현재 주)
-        const { data: adData } = await supabase
-          .from("mkt_ad_overview")
-          .select("*")
-          .eq("report_id", reportId);
-        setAdOverviewData(adData || []);
-
-        // 1-1. 광고 현황 인사이트
-        const { data: adNotesData } = await supabase
-          .from("mkt_ad_overview_notes")
-          .select("content")
-          .eq("report_id", reportId)
-          .maybeSingle();
-        setAdOverviewNotes((adNotesData as any)?.content || "");
-
-        // 2. 최근 3주 보고서 가져오기
-        const { data: recentReports } = await supabase
-          .from("weekly_reports")
-          .select("id, title, start_date, end_date")
-          .lte("start_date", currentReport.start_date)
-          .order("start_date", { ascending: false })
-          .limit(3);
-
-        if (recentReports) {
-          // 비용 추이 (최근 3주) - mkt_cost_trend + mkt_ad_overview (total_spend)
-          const costPromises = recentReports.map((report) =>
-            supabase
-              .from("mkt_cost_trend")
-              .select("*")
-              .eq("report_id", report.id)
-          );
-          const adOverviewForCostPromises = recentReports.map((report) =>
-            supabase
-              .from("mkt_ad_overview")
-              .select("media, total_spend")
-              .eq("report_id", report.id)
-          );
-          const costResults = await Promise.all(costPromises);
-          const adOverviewForCostResults = await Promise.all(adOverviewForCostPromises);
-          
-          const costData = recentReports.map((report, index) => ({
-            ...report,
-            costs: costResults[index].data || [],
-            totalSpends: adOverviewForCostResults[index].data || [],
-          }));
-          setCostTrendData(costData);
-
-          // DB개수 추이 (최근 3주) - mkt_ad_overview에서 가져오기
-          const adOverviewPromises = recentReports.map((report) =>
-            supabase
-              .from("mkt_ad_overview")
-              .select("*")
-              .eq("report_id", report.id)
-          );
-          const adOverviewResults = await Promise.all(adOverviewPromises);
-          const countData = recentReports.map((report, index) => ({
-            ...report,
-            adData: adOverviewResults[index].data || [],
-          }));
-          setDbCountTrendData(countData);
-        }
-
-        // 4. 보고사항
-        const { data: notesData } = await supabase
-          .from("mkt_report_notes")
-          .select("content")
-          .eq("report_id", reportId)
-          .maybeSingle();
-        setReportNotes((notesData as any)?.content || "");
-      } catch (error) {
-        console.error("Error loading marketing data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [reportId, currentReport]);
+  const {
+    loading,
+    error,
+    adOverviewData,
+    adOverviewNotes,
+    costTrendData,
+    dbCountTrendData,
+    reportNotes,
+  } = useMarketingData(reportId, currentReport);
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
@@ -128,6 +35,10 @@ export default function MarketingDashboardPage() {
                 <Skeleton className="h-40 w-full" />
                 <Skeleton className="h-96 w-full" />
               </div>
+            ) : error ? (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             ) : (
               <div className="space-y-8">
                 <div className="space-y-2">
