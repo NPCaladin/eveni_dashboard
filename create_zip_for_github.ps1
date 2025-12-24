@@ -80,3 +80,6 @@ Write-Host "파일 크기: $([math]::Round((Get-Item $zipPath).Length / 1MB, 2))
 
 
 
+
+
+

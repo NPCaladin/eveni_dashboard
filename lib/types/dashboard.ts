@@ -56,6 +56,17 @@ export interface ConversionTrendData {
     conversionRate: number;
     totalSpend: number;
   };
+  payment?: {
+    specialDbCount: number;
+    specialPaymentCount: number;
+    specialConversionRate: number;
+    generalDbCount: number;
+    generalPaymentCount: number;
+    generalConversionRate: number;
+    totalDbCount: number;
+    totalPaymentCount: number;
+    totalConversionRate: number;
+  };
 }
 
 // ============================================

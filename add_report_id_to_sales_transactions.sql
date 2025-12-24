@@ -18,3 +18,6 @@ COMMENT ON COLUMN sales_transactions.report_id IS '주차 보고서 ID (주차�
 
 
 
+
+
+

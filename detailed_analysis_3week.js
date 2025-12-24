@@ -65,3 +65,6 @@ console.log(`차이: ${(totalPayments - dashboardAmount).toLocaleString()}원`);
 
 
 
+
+
+

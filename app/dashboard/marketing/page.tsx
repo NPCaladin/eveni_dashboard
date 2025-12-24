@@ -15,6 +15,7 @@ import { ConversionTrendSection } from "@/components/dashboard/marketing/convers
 import { CpaTrendChart } from "@/components/dashboard/marketing/cpa-trend-chart";
 import { CostTrendChart } from "@/components/dashboard/marketing/cost-trend-chart";
 import { DbVolumeTrendChart } from "@/components/dashboard/marketing/db-volume-trend-chart";
+import { PaymentConversionTrendChart } from "@/components/dashboard/marketing/payment-conversion-trend-chart";
 import { MarketingNotesSection } from "@/components/dashboard/marketing/notes-section";
 
 export default function MarketingDashboardPage() {
@@ -131,6 +132,11 @@ export default function MarketingDashboardPage() {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <CostTrendChart data={conversionTrendData} period={period} />
                     <DbVolumeTrendChart data={conversionTrendData} period={period} />
+                  </div>
+
+                  {/* 4번째 줄 (Full Width): DB 유형별 결제 전환율 추이 */}
+                  <div>
+                    <PaymentConversionTrendChart data={conversionTrendData} period={period} />
                   </div>
                 </section>
 

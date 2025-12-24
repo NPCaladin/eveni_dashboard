@@ -46,9 +46,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ data: [] });
     }
 
-    // 2. 각 주차별 광고 개요 데이터 가져오기
+    // 2. 각 주차별 광고 개요 데이터 + 결제 전환 데이터 가져오기
     const conversionData = await Promise.all(
       reports.map(async (report) => {
+        // 광고 개요 데이터 조회
         const { data: adData, error: adError } = await supabase
           .from("mkt_ad_overview")
           .select("media, stage_1_count, stage_2_count, total_spend")
@@ -57,6 +58,18 @@ export async function GET(request: NextRequest) {
         if (adError) {
           console.error(`Error fetching ad data for ${report.id}:`, adError);
           return null;
+        }
+
+        // 결제 전환 데이터 조회
+        const { data: paymentData, error: paymentError } = await supabase
+          .from("mkt_payment_conversion")
+          .select("*")
+          .eq("report_id", report.id)
+          .single();
+
+        if (paymentError && paymentError.code !== 'PGRST116') {
+          // PGRST116은 "No rows found" 에러로, 데이터가 없는 경우 무시
+          console.error(`Error fetching payment data for ${report.id}:`, paymentError);
         }
 
         // 카카오와 메타 데이터 추출
@@ -93,6 +106,18 @@ export async function GET(request: NextRequest) {
             conversionRate: metaConversionRate,
             totalSpend: metaData?.total_spend || 0,
           },
+          // 결제 전환 데이터 추가
+          payment: paymentData ? {
+            specialDbCount: paymentData.special_db_count,
+            specialPaymentCount: paymentData.special_payment_count,
+            specialConversionRate: paymentData.special_conversion_rate,
+            generalDbCount: paymentData.general_db_count,
+            generalPaymentCount: paymentData.general_payment_count,
+            generalConversionRate: paymentData.general_conversion_rate,
+            totalDbCount: paymentData.total_db_count,
+            totalPaymentCount: paymentData.total_payment_count,
+            totalConversionRate: paymentData.total_conversion_rate,
+          } : undefined,
         };
       })
     );

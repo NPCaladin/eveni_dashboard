@@ -17,3 +17,6 @@ COMMENT ON COLUMN sales_transactions.report_id IS '주간 보고서 ID - 어느 
 
 
 
+
+
+

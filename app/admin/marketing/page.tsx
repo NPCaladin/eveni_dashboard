@@ -4,6 +4,7 @@ import { AdOverviewForm } from "@/components/marketing/ad-overview-form";
 import { AdOverviewNotesForm } from "@/components/marketing/ad-overview-notes-form";
 import { TrendDataForm } from "@/components/marketing/trend-data-form";
 import { MarketingReportNotes } from "@/components/marketing/report-notes-form";
+import { PaymentStatsForm } from "@/components/marketing/payment-stats-form";
 
 export default function MarketingAdminPage() {
   return (
@@ -26,6 +27,9 @@ export default function MarketingAdminPage() {
 
       {/* 4. 기타 보고 사항 */}
       <MarketingReportNotes />
+
+      {/* 5. 결제 전환율 데이터 */}
+      <PaymentStatsForm />
     </div>
   );
 }
