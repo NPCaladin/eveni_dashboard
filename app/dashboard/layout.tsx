@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { SidebarProvider } from "@/contexts/sidebar-context";
 
 export const dynamic = 'force-dynamic';
 
@@ -12,9 +13,11 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Suspense fallback={<Loading />}>
-      {children}
-    </Suspense>
+    <SidebarProvider>
+      <Suspense fallback={<Loading />}>
+        {children}
+      </Suspense>
+    </SidebarProvider>
   );
 }
 

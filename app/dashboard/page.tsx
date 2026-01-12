@@ -67,25 +67,30 @@ export default function DashboardPage() {
                 </div>
 
                 <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                  <TabsList className="grid w-full grid-cols-5">
-                    <TabsTrigger value="all" className="flex items-center gap-2">
+                  {/* 모바일: 가로 스크롤 / 데스크톱: 그리드 */}
+                  <TabsList className="flex sm:grid sm:grid-cols-5 w-full overflow-x-auto">
+                    <TabsTrigger value="all" className="flex items-center gap-2 flex-shrink-0 px-3 sm:px-4">
                       <span>전체</span>
                     </TabsTrigger>
-                    <TabsTrigger value="management" className="flex items-center gap-2">
+                    <TabsTrigger value="management" className="flex items-center gap-2 flex-shrink-0 px-3 sm:px-4">
                       <Building2 className="h-4 w-4" />
-                      <span>경영혁신실</span>
+                      <span className="hidden sm:inline">경영혁신실</span>
+                      <span className="sm:hidden">경영</span>
                     </TabsTrigger>
-                    <TabsTrigger value="marketing" className="flex items-center gap-2">
+                    <TabsTrigger value="marketing" className="flex items-center gap-2 flex-shrink-0 px-3 sm:px-4">
                       <Megaphone className="h-4 w-4" />
-                      <span>마케팅본부</span>
+                      <span className="hidden sm:inline">마케팅본부</span>
+                      <span className="sm:hidden">마케팅</span>
                     </TabsTrigger>
-                    <TabsTrigger value="education" className="flex items-center gap-2">
+                    <TabsTrigger value="education" className="flex items-center gap-2 flex-shrink-0 px-3 sm:px-4">
                       <GraduationCap className="h-4 w-4" />
-                      <span>교육사업본부</span>
+                      <span className="hidden sm:inline">교육사업본부</span>
+                      <span className="sm:hidden">교육</span>
                     </TabsTrigger>
-                    <TabsTrigger value="sales" className="flex items-center gap-2">
+                    <TabsTrigger value="sales" className="flex items-center gap-2 flex-shrink-0 px-3 sm:px-4">
                       <Users className="h-4 w-4" />
-                      <span>세일즈본부</span>
+                      <span className="hidden sm:inline">세일즈본부</span>
+                      <span className="sm:hidden">세일즈</span>
                     </TabsTrigger>
                   </TabsList>
 

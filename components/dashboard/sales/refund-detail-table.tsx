@@ -53,16 +53,57 @@ export function RefundDetailTable({ refunds }: RefundDetailTableProps) {
     );
   }
 
+  // 모바일 카드 뷰 컴포넌트
+  const MobileCardView = () => (
+    <div className="space-y-3 md:hidden">
+      {refunds.map((refund, index) => (
+        <div key={index} className="border rounded-lg p-4 bg-white">
+          <div className="flex justify-between items-start mb-2">
+            <span className="text-sm text-gray-500">{formatDate(refund.refund_date)}</span>
+            <span className="font-bold text-red-600">{formatCurrency(refund.refund_amount)}원</span>
+          </div>
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-600">환불자</span>
+              <span className="font-medium">{refund.buyer || "-"}</span>
+            </div>
+            {refund.seller && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">담당</span>
+                <Badge variant="outline" className="text-xs">{refund.seller}</Badge>
+              </div>
+            )}
+            {refund.refund_reason && (
+              <div className="mt-2 pt-2 border-t">
+                <span className="text-gray-600 text-xs">사유: </span>
+                <span className="text-xs">{refund.refund_reason}</span>
+              </div>
+            )}
+            {refund.product_name && (
+              <div className="text-xs text-gray-500 mt-1">
+                {refund.product_name}{refund.weeks && ` (${refund.weeks}주)`}
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <Card className="mb-8">
       <CardHeader className="relative">
         <CardTitle className="text-lg">이번 주 환불 상세</CardTitle>
-        <div className="absolute top-4 right-4 text-xs text-gray-500">
+        <div className="absolute top-4 right-4 text-xs text-gray-500 hidden md:block">
           단위: 원
         </div>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
+        {/* 모바일 카드 뷰 */}
+        <MobileCardView />
+
+        {/* 데스크톱 테이블 뷰 */}
+        <div className="hidden md:block overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>

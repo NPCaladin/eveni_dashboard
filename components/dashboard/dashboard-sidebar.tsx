@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useSidebar } from "@/contexts/sidebar-context";
 import {
   LayoutDashboard,
   Building2,
   Megaphone,
   GraduationCap,
   Users,
+  X,
 } from "lucide-react";
 
 const menuItems = [
@@ -33,42 +35,50 @@ export function DashboardSidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentTab = getTabFromUrl(pathname, searchParams);
+  const { isOpen, close } = useSidebar();
 
   const isActive = (href: string) => {
-    // 쿼리 파라미터 제거한 경로 비교
     const currentPath = pathname.split("?")[0];
     const menuPath = href.split("?")[0];
-    
-    // /dashboard/sales는 교육사업본부로 특별 처리
+
     if (href === "/dashboard/sales") {
       return currentPath === "/dashboard/sales";
     }
-    
-    // /dashboard/marketing은 마케팅본부로 특별 처리
+
     if (href === "/dashboard/marketing") {
       return currentPath === "/dashboard/marketing";
     }
-    
-    // /dashboard 페이지의 경우 탭 비교
+
     if (menuPath === "/dashboard" && currentPath === "/dashboard") {
-      // 전체보기
       if (href === "/dashboard") {
         return currentTab === "all";
       }
-      // 탭이 있는 경우
       if (href.includes("tab=")) {
         const tab = href.split("tab=")[1];
         return currentTab === tab;
       }
     }
-    
+
     return currentPath === menuPath;
   };
 
-  return (
-    <div className="flex h-full w-64 flex-col border-r bg-card">
-      <div className="flex h-16 items-center border-b px-6">
+  const handleLinkClick = () => {
+    // 모바일에서 메뉴 클릭 시 사이드바 닫기
+    close();
+  };
+
+  const SidebarContent = () => (
+    <>
+      <div className="flex h-16 items-center justify-between border-b px-6">
         <h1 className="text-xl font-bold">대시보드</h1>
+        {/* 모바일에서만 닫기 버튼 표시 */}
+        <button
+          onClick={close}
+          className="lg:hidden p-2 rounded-md hover:bg-accent"
+          aria-label="메뉴 닫기"
+        >
+          <X className="h-5 w-5" />
+        </button>
       </div>
       <nav className="flex-1 space-y-1 p-4">
         {menuItems.map((item) => {
@@ -78,6 +88,7 @@ export function DashboardSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={handleLinkClick}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
                 active
@@ -91,7 +102,40 @@ export function DashboardSidebar() {
           );
         })}
       </nav>
-    </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* 데스크톱 사이드바 - lg 이상에서만 표시 */}
+      <div className="hidden lg:flex h-full w-64 flex-col border-r bg-card">
+        <SidebarContent />
+      </div>
+
+      {/* 모바일 사이드바 오버레이 - lg 미만에서만 동작 */}
+      <div
+        className={cn(
+          "lg:hidden fixed inset-0 z-50 transition-opacity duration-300",
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+      >
+        {/* 배경 오버레이 */}
+        <div
+          className="absolute inset-0 bg-black/50"
+          onClick={close}
+          aria-hidden="true"
+        />
+
+        {/* 사이드바 패널 */}
+        <div
+          className={cn(
+            "absolute left-0 top-0 h-full w-64 bg-card shadow-xl transition-transform duration-300 ease-in-out",
+            isOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+          <SidebarContent />
+        </div>
+      </div>
+    </>
   );
 }
-

@@ -49,13 +49,83 @@ export function ProductMatrixTable({
     { key: "스터디" as const, label: "스터디", color: "bg-pink-600", bgColor: "bg-pink-50", show: data["스터디"].count > 0 },
   ].filter(cat => cat.show);
 
+  // 모바일 카드 뷰 컴포넌트
+  const MobileCardView = () => (
+    <div className="space-y-4 md:hidden">
+      {/* 1타 상품 */}
+      <div className="border rounded-lg p-4 bg-blue-50">
+        <h4 className="font-semibold text-sm mb-3 text-blue-700">1타 상품</h4>
+        <div className="grid grid-cols-4 gap-2 text-xs mb-2">
+          {(["20", "26", "32", "40"] as const).map((week) => (
+            <div key={week} className="text-center p-2 bg-white rounded">
+              <div className="text-gray-500">{week}주</div>
+              <div className="font-medium">{data["1타"][week].count}건</div>
+              <div className="text-blue-600">{data["1타"][week].share.toFixed(1)}%</div>
+            </div>
+          ))}
+        </div>
+        <div className="text-right text-sm font-bold text-blue-700">
+          합계: {data["1타"].sum.count}건 ({data["1타"].sum.share.toFixed(1)}%)
+        </div>
+      </div>
+
+      {/* 일반 상품 */}
+      <div className="border rounded-lg p-4 bg-purple-50">
+        <h4 className="font-semibold text-sm mb-3 text-purple-700">일반 상품</h4>
+        <div className="grid grid-cols-4 gap-2 text-xs mb-2">
+          {(["20", "26", "32", "40"] as const).map((week) => (
+            <div key={week} className="text-center p-2 bg-white rounded">
+              <div className="text-gray-500">{week}주</div>
+              <div className="font-medium">{data["일반"][week].count}건</div>
+              <div className="text-purple-600">{data["일반"][week].share.toFixed(1)}%</div>
+            </div>
+          ))}
+        </div>
+        <div className="text-right text-sm font-bold text-purple-700">
+          합계: {data["일반"].sum.count}건 ({data["일반"].sum.share.toFixed(1)}%)
+        </div>
+      </div>
+
+      {/* 기타 카테고리 */}
+      {(visibleCategories.length > 0 || data["기타"].count > 0) && (
+        <div className="border rounded-lg p-4">
+          <h4 className="font-semibold text-sm mb-3 text-gray-700">기타 상품</h4>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            {visibleCategories.map((cat) => (
+              <div key={cat.key} className={`p-2 rounded ${cat.bgColor}`}>
+                <span className="text-gray-600">{cat.label}</span>
+                <span className="font-medium ml-2">{data[cat.key].count}건</span>
+                <span className="text-gray-500 ml-1">({data[cat.key].share.toFixed(1)}%)</span>
+              </div>
+            ))}
+            {data["기타"].count > 0 && (
+              <div className="p-2 rounded bg-gray-50">
+                <span className="text-gray-600">기타</span>
+                <span className="font-medium ml-2">{data["기타"].count}건</span>
+                <span className="text-gray-500 ml-1">({data["기타"].share.toFixed(1)}%)</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="text-right text-sm font-medium text-gray-600">
+        총 {totalCount}건
+      </div>
+    </div>
+  );
+
   return (
     <Card className="mb-8">
       <CardHeader>
         <CardTitle className="text-lg">상품별 판매 현황</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
+        {/* 모바일 카드 뷰 */}
+        <MobileCardView />
+
+        {/* 데스크톱 테이블 뷰 */}
+        <div className="hidden md:block overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -224,7 +294,7 @@ export function ProductMatrixTable({
             </TableBody>
           </Table>
         </div>
-        <div className="mt-4 text-right text-sm text-gray-600">
+        <div className="hidden md:block mt-4 text-right text-sm text-gray-600">
           총 {totalCount}건
         </div>
       </CardContent>
