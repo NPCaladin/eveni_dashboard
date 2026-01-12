@@ -23,6 +23,7 @@ import {
   calculateKPIData,
   generateAlerts,
 } from "@/lib/dashboard-data-processor";
+import { parseMentorReport } from "@/lib/utils/parse-mentor-report";
 import type { Database } from "@/lib/supabase/types";
 
 type SalesTransaction = Database["public"]["Tables"]["sales_transactions"]["Row"];
@@ -514,15 +515,33 @@ export default function PremiumDashboardPage() {
       totalManaged: 222,
     };
 
-    const mentoringIssues = mentoringReports.map((m, idx) => ({
-      id: m.id,
-      title: m.issues || "이슈 없음",
-      summary: m.note || "",
-      consultant: m.mentor_name,
-      jobGroup: "기획", // 실제로는 mentor 정보에서 가져오기
-      priority: (idx % 3 === 0 ? "high" : idx % 3 === 1 ? "medium" : "low") as "high" | "medium" | "low",
-      date: new Date(m.created_at).toLocaleDateString("ko-KR"),
-    }));
+    // 멘토링 보고서 파싱하여 이슈 추출
+    const parsedMentorReports = mentoringReports.map(parseMentorReport);
+    const mentoringIssues: Array<{
+      id: string;
+      title: string;
+      summary: string;
+      consultant: string;
+      jobGroup: string;
+      priority: "high" | "medium" | "low";
+      date: string;
+    }> = [];
+
+    // 각 멘토의 파싱된 이슈들을 전체 이슈 목록에 추가
+    mentoringReports.forEach((originalReport, mentorIdx) => {
+      const parsedReport = parsedMentorReports[mentorIdx];
+      parsedReport.issues.forEach((issue, issueIdx) => {
+        mentoringIssues.push({
+          id: `${parsedReport.mentorName}-${issueIdx}`,
+          title: issue.header || `이슈 ${issue.number}`,
+          summary: issue.content || "",
+          consultant: parsedReport.mentorName,
+          jobGroup: "기획", // 실제로는 mentor 정보에서 가져오기
+          priority: (issueIdx % 3 === 0 ? "high" : issueIdx % 3 === 1 ? "medium" : "low") as "high" | "medium" | "low",
+          date: new Date(originalReport.created_at).toLocaleDateString("ko-KR"),
+        });
+      });
+    });
 
     // 미개시 환불 (샘플)
     const unstartedRefunds = [
