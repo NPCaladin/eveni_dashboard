@@ -68,9 +68,10 @@ export async function createPaymentStats(input: PaymentStatsInput) {
     revalidatePath("/dashboard/marketing");
 
     return { success: true, data };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Create exception:", error);
-    return { success: false, error: error.message };
+    const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류";
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -120,9 +121,10 @@ export async function updatePaymentStats(id: string, input: PaymentStatsInput) {
     revalidatePath("/dashboard/marketing");
 
     return { success: true, data };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Update exception:", error);
-    return { success: false, error: error.message };
+    const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류";
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -146,9 +148,10 @@ export async function deletePaymentStats(id: string) {
     revalidatePath("/dashboard/marketing");
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Delete exception:", error);
-    return { success: false, error: error.message };
+    const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류";
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -170,9 +173,10 @@ export async function getPaymentStatsByReportId(reportId: string) {
     }
 
     return { success: true, data: data || null };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Get exception:", error);
-    return { success: false, error: error.message };
+    const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류";
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -223,9 +227,10 @@ export async function getRecentPaymentStats(limit: number = 10) {
       .filter(item => item !== null);
 
     return { success: true, data: result };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Get list exception:", error);
-    return { success: false, error: error.message };
+    const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류";
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -249,9 +254,10 @@ export async function getWeeklyReports() {
     }
 
     return { success: true, data: data || [] };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Get reports exception:", error);
-    return { success: false, error: error.message };
+    const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류";
+    return { success: false, error: errorMessage };
   }
 }
 

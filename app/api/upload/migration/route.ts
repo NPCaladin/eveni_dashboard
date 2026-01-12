@@ -598,10 +598,11 @@ export async function POST(request: NextRequest) {
       weeksProcessed: results.length,
       detail: results,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Migration upload error", error);
+    const errorMessage = error instanceof Error ? error.message : "마이그레이션 업로드 실패";
     return NextResponse.json(
-      { error: error.message || "마이그레이션 업로드 실패" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

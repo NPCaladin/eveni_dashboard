@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase/client";
+import { getErrorMessage } from "@/lib/utils/error";
 
 export function WeekSelector() {
   const { reports, reportId, setReportId, loading } = useWeeklyReport();
@@ -72,11 +73,11 @@ export function WeekSelector() {
       
       // 페이지 새로고침하여 데이터 다시 로드
       window.location.reload();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error creating week:", error);
       toast({
         title: "생성 실패",
-        description: error.message || "주차 생성 중 오류가 발생했습니다.",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {

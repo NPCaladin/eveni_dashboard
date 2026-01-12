@@ -173,11 +173,12 @@ export function ConsultantResourceUpload() {
       if (event && event.target) {
         (event.target as HTMLInputElement).value = "";
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("컨설턴트 리소스 업로드 에러:", error);
+      const errorMessage = error instanceof Error ? error.message : "파일 처리 중 오류가 발생했습니다.";
       toast({
         title: "업로드 실패",
-        description: error.message || "파일 처리 중 오류가 발생했습니다.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

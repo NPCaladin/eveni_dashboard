@@ -230,11 +230,12 @@ export function RevenueUploadForm() {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Upload error:", error);
+      const errorMessage = error instanceof Error ? error.message : "업로드 중 오류가 발생했습니다.";
       toast({
         title: "오류",
-        description: error.message || "업로드 중 오류가 발생했습니다.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

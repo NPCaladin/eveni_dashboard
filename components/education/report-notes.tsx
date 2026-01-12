@@ -120,11 +120,12 @@ export function ReportNotes() {
       });
       if (error) throw error;
       toast({ title: "저장 완료", description: "보고 사항이 저장되었습니다." });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("save report notes error", error);
+      const errorMessage = error instanceof Error ? error.message : "보고 사항 저장 중 오류가 발생했습니다.";
       toast({
         title: "저장 실패",
-        description: error.message || "보고 사항 저장 중 오류가 발생했습니다.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

@@ -180,9 +180,10 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, processed: rows.length });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Backfill revenue error", error);
-    return NextResponse.json({ error: error.message || "업로드 실패" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "업로드 실패";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 

@@ -133,11 +133,12 @@ export function DeleteWeekData() {
         window.location.reload();
       }, 1500);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("삭제 에러:", error);
+      const errorMessage = error instanceof Error ? error.message : "데이터 삭제 중 오류가 발생했습니다.";
       toast({
         title: "삭제 실패",
-        description: error.message || "데이터 삭제 중 오류가 발생했습니다.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

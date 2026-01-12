@@ -114,10 +114,11 @@ export async function POST(request: NextRequest) {
       inserted: rows.length,
       preview: rows,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Resource upload error:", error);
+    const errorMessage = error instanceof Error ? error.message : "업로드 실패";
     return NextResponse.json(
-      { error: error.message || "업로드 실패" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

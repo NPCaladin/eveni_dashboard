@@ -129,11 +129,12 @@ export function AdOverviewNotesForm() {
       
       if (error) throw error;
       toast({ title: "저장 완료", description: "광고 현황 인사이트가 저장되었습니다." });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("save ad overview notes error", error);
+      const errorMessage = error instanceof Error ? error.message : "광고 현황 인사이트 저장 중 오류가 발생했습니다.";
       toast({
         title: "저장 실패",
-        description: error.message || "광고 현황 인사이트 저장 중 오류가 발생했습니다.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -225,6 +226,10 @@ export function AdOverviewNotesForm() {
     </Card>
   );
 }
+
+
+
+
 
 
 

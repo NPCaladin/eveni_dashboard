@@ -45,11 +45,12 @@ export function MigrationUpload() {
         description: `${json.weeksProcessed}개 주차로 분배되었습니다.`,
       });
       if (fileRef.current) fileRef.current.value = "";
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("migration upload error", error);
+      const errorMessage = error instanceof Error ? error.message : "마이그레이션 업로드 실패";
       toast({
         title: "오류",
-        description: error.message || "마이그레이션 업로드 실패",
+        description: errorMessage,
         variant: "destructive",
       });
       setProgressMsg("업로드 실패");
@@ -113,6 +114,10 @@ export function MigrationUpload() {
     </Card>
   );
 }
+
+
+
+
 
 
 

@@ -177,11 +177,12 @@ export function ConsultantResourceManager() {
         .order("consultant_name", { ascending: true });
 
       setConsultants(newData || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error copying from prev week:", error);
+      const errorMessage = error instanceof Error ? error.message : "전주 데이터 복사 중 오류가 발생했습니다.";
       toast({
         title: "복사 실패",
-        description: error.message || "전주 데이터 복사 중 오류가 발생했습니다.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

@@ -217,11 +217,12 @@ export function DepartmentIssuesForm() {
             title: "이미지 삽입 완료",
             description: "이미지가 성공적으로 삽입되었습니다.",
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error("Image upload error:", error);
+          const errorMessage = error instanceof Error ? error.message : "이미지 업로드 중 오류가 발생했습니다.";
           toast({
             title: "이미지 삽입 실패",
-            description: error.message || "이미지 업로드 중 오류가 발생했습니다.",
+            description: errorMessage,
             variant: "destructive",
           });
         } finally {

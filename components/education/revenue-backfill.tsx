@@ -30,11 +30,12 @@ export function RevenueBackfill() {
         description: `${json.processed || 0}개의 주차 데이터가 반영되었습니다.`,
       });
       if (fileRef.current) fileRef.current.value = "";
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("backfill upload error", error);
+      const errorMessage = error instanceof Error ? error.message : "업로드 중 오류가 발생했습니다.";
       toast({
         title: "오류",
-        description: error.message || "업로드 중 오류가 발생했습니다.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -89,6 +90,10 @@ export function RevenueBackfill() {
     </Card>
   );
 }
+
+
+
+
 
 
 

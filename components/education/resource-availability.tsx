@@ -96,11 +96,12 @@ export function ResourceAvailability() {
       });
       setRows(json.preview || []);
       if (fileInputRef.current) fileInputRef.current.value = "";
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("upload resource error", error);
+      const errorMessage = error instanceof Error ? error.message : "업로드 중 오류가 발생했습니다.";
       toast({
         title: "오류",
-        description: error.message || "업로드 중 오류가 발생했습니다.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -189,11 +190,12 @@ export function ResourceAvailability() {
       if (error) throw error;
       toast({ title: "저장 완료", description: "배정 가능 여부가 저장되었습니다." });
       loadData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("save availability error", error);
+      const errorMessage = error instanceof Error ? error.message : "저장 중 오류가 발생했습니다.";
       toast({
         title: "오류",
-        description: error.message || "저장 중 오류가 발생했습니다.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
