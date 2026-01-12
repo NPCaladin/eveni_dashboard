@@ -38,7 +38,7 @@ export function parseIssues(text: string): ParsedIssue[] {
 
   // 환불방어 섹션 위치 찾기 (● 환불방어로 시작하는 부분)
   const refundDefenseIndex = trimmed.search(/●\s*환불방어/i);
-  
+
   // 일반 이슈 텍스트 (환불방어 섹션 이전 부분)
   const regularIssuesText = refundDefenseIndex >= 0
     ? trimmed.substring(0, refundDefenseIndex).trim()
@@ -48,7 +48,7 @@ export function parseIssues(text: string): ParsedIssue[] {
   if (regularIssuesText) {
     // 번호로 시작하는 패턴으로 분리
     const issueBlocks = regularIssuesText.split(/(?=\d+\.\s*)/);
-    
+
     issueBlocks.forEach((block) => {
       const blockTrimmed = block.trim();
       if (!blockTrimmed || blockTrimmed === "") return;
@@ -58,11 +58,11 @@ export function parseIssues(text: string): ParsedIssue[] {
         const number = parseInt(numberMatch[1], 10);
         // 다음 번호까지의 내용 추출
         const nextNumberMatch = blockTrimmed.match(/\n(\d+)\./);
-        const contentEnd = nextNumberMatch 
+        const contentEnd = nextNumberMatch
           ? blockTrimmed.indexOf(nextNumberMatch[0])
           : blockTrimmed.length;
         const issueText = blockTrimmed.substring(0, contentEnd);
-        
+
         const lines = issueText.split("\n");
         const header = lines[0].replace(/^\d+\.\s*/, "").trim();
         const content = lines.slice(1).join("\n").trim();
@@ -84,10 +84,10 @@ export function parseIssues(text: string): ParsedIssue[] {
     const refundDefenseSection = trimmed.substring(refundDefenseIndex);
     // "● 환불방어" 제거하고 내용만 추출 (비고 섹션 전까지)
     const refundDefenseMatch = refundDefenseSection.match(/●\s*환불방어\s*([\s\S]*?)(?=\n비고|$)/i);
-    
+
     if (refundDefenseMatch && refundDefenseMatch[1]) {
       const refundDefenseText = refundDefenseMatch[1].trim();
-      
+
       if (refundDefenseText) {
         // 환불방어 항목들을 분리
         // 패턴: [컨설턴트/타입] 이름 / ID로 시작하는 항목들
@@ -100,7 +100,7 @@ export function parseIssues(text: string): ParsedIssue[] {
           const altBlocks = refundDefenseText
             .split(/\n\s*\n/)
             .filter(block => block.trim());
-          
+
           altBlocks.forEach((block, index) => {
             const blockTrimmed = block.trim();
             if (!blockTrimmed) return;
@@ -108,7 +108,7 @@ export function parseIssues(text: string): ParsedIssue[] {
             const lines = blockTrimmed.split("\n");
             let header = lines[0].trim();
             header = header.replace(/^(Case\s*\d+|사례\s*\d+|환불방어\s*사례)\s*:?\s*/i, "");
-            
+
             const content = lines.slice(1).join("\n").trim();
 
             issues.push({
@@ -142,16 +142,31 @@ export function parseIssues(text: string): ParsedIssue[] {
   return issues;
 }
 
+// DB에서 반환되는 snake_case 형식
+interface DBMentorReport {
+  mentor_name?: string;
+  mentee_status?: string;
+  issues?: string;
+  note?: string;
+}
+
 /**
  * 멘토 보고서 전체 파싱
+ * DB에서 가져온 데이터는 snake_case, 타입 정의는 camelCase이므로 둘 다 지원
  */
-export function parseMentorReport(report: any): ParsedMentorReport {
+export function parseMentorReport(report: MentorReport | DBMentorReport): ParsedMentorReport {
+  // snake_case와 camelCase 둘 다 지원 (DB에서 가져온 데이터는 snake_case)
+  const dbReport = report as DBMentorReport;
+  const camelReport = report as MentorReport;
+
+  const mentorName = dbReport.mentor_name || camelReport.mentorName || "";
+  const menteeStatusText = dbReport.mentee_status || camelReport.menteeStatus || "";
   const issuesText = report.issues || "";
   const noteText = report.note || "";
-  
+
   // 주요 이슈 파싱
   let allIssues = parseIssues(issuesText);
-  
+
   // 주요 이슈가 비어있고 비고에 번호로 시작하는 내용이 있으면 비고도 파싱
   if (allIssues.length === 0 && noteText.trim()) {
     const noteIssues = parseIssues(noteText);
@@ -159,21 +174,20 @@ export function parseMentorReport(report: any): ParsedMentorReport {
       allIssues = noteIssues;
       // 비고에서 파싱한 경우 note는 빈 문자열로 (중복 방지)
       return {
-        mentorName: report.mentor_name || report.mentorName,
-        menteeStatus: parseMenteeStatus(report.mentee_status || report.menteeStatus),
+        mentorName,
+        menteeStatus: parseMenteeStatus(menteeStatusText),
         issues: allIssues,
         note: "",
         rawIssues: noteText,
       };
     }
   }
-  
+
   return {
-    mentorName: report.mentor_name || report.mentorName,
-    menteeStatus: parseMenteeStatus(report.mentee_status || report.menteeStatus),
+    mentorName,
+    menteeStatus: parseMenteeStatus(menteeStatusText),
     issues: allIssues,
     note: noteText,
     rawIssues: issuesText,
   };
 }
-
