@@ -230,15 +230,17 @@ export async function getRecentPaymentStats(limit: number = 10) {
 }
 
 /**
- * 2025년 모든 주차 보고서 조회
+ * 2024년부터 현재 연도까지 모든 주차 보고서 조회
  */
 export async function getWeeklyReports() {
   try {
+    const currentYear = new Date().getFullYear();
+    
     const { data, error } = await supabase
       .from("weekly_reports")
       .select("id, title, start_date, end_date")
-      .gte("start_date", "2025-01-01")
-      .lt("start_date", "2026-01-01")
+      .gte("start_date", "2024-01-01")
+      .lt("start_date", `${currentYear + 1}-01-01`)
       .order("start_date", { ascending: true });
 
     if (error) {
