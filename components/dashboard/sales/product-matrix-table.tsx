@@ -10,26 +10,34 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+interface ProductMatrixCell {
+  count: number;
+  share: number;
+  amount: number;
+  amountShare: number;
+}
+
 interface ProductMatrixData {
   "1타": {
-    "20": { count: number; share: number };
-    "26": { count: number; share: number };
-    "32": { count: number; share: number };
-    "40": { count: number; share: number };
-    sum: { count: number; share: number };
+    "20": ProductMatrixCell;
+    "26": ProductMatrixCell;
+    "32": ProductMatrixCell;
+    "40": ProductMatrixCell;
+    sum: ProductMatrixCell;
   };
   일반: {
-    "20": { count: number; share: number };
-    "26": { count: number; share: number };
-    "32": { count: number; share: number };
-    "40": { count: number; share: number };
-    sum: { count: number; share: number };
+    "20": ProductMatrixCell;
+    "26": ProductMatrixCell;
+    "32": ProductMatrixCell;
+    "40": ProductMatrixCell;
+    sum: ProductMatrixCell;
   };
-  그룹반: { count: number; share: number };
-  합격보장반: { count: number; share: number };
-  GM: { count: number; share: number };
-  스터디: { count: number; share: number };
-  기타: { count: number; share: number };
+  그룹반: ProductMatrixCell;
+  합격보장반: ProductMatrixCell;
+  GM: ProductMatrixCell;
+  스터디: ProductMatrixCell;
+  기타: ProductMatrixCell;
+  totalAmount: number;
 }
 
 interface ProductMatrixTableProps {
@@ -49,6 +57,14 @@ export function ProductMatrixTable({
     { key: "스터디" as const, label: "스터디", color: "bg-pink-600", bgColor: "bg-pink-50", show: data["스터디"].count > 0 },
   ].filter(cat => cat.show);
 
+  // 금액 포맷 함수
+  const formatAmount = (amount: number) => {
+    if (amount >= 10000) {
+      return `${(amount / 10000).toFixed(0)}만`;
+    }
+    return amount.toLocaleString();
+  };
+
   // 모바일 카드 뷰 컴포넌트
   const MobileCardView = () => (
     <div className="space-y-4 md:hidden">
@@ -61,11 +77,13 @@ export function ProductMatrixTable({
               <div className="text-gray-500">{week}주</div>
               <div className="font-medium">{data["1타"][week].count}건</div>
               <div className="text-blue-600">{data["1타"][week].share.toFixed(1)}%</div>
+              <div className="text-green-600 text-[10px]">₩{data["1타"][week].amountShare.toFixed(1)}%</div>
             </div>
           ))}
         </div>
-        <div className="text-right text-sm font-bold text-blue-700">
-          합계: {data["1타"].sum.count}건 ({data["1타"].sum.share.toFixed(1)}%)
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-gray-600">금액비중: <span className="font-bold text-green-700">{data["1타"].sum.amountShare.toFixed(1)}%</span></span>
+          <span className="font-bold text-blue-700">건수: {data["1타"].sum.count}건 ({data["1타"].sum.share.toFixed(1)}%)</span>
         </div>
       </div>
 
@@ -78,11 +96,13 @@ export function ProductMatrixTable({
               <div className="text-gray-500">{week}주</div>
               <div className="font-medium">{data["일반"][week].count}건</div>
               <div className="text-purple-600">{data["일반"][week].share.toFixed(1)}%</div>
+              <div className="text-green-600 text-[10px]">₩{data["일반"][week].amountShare.toFixed(1)}%</div>
             </div>
           ))}
         </div>
-        <div className="text-right text-sm font-bold text-purple-700">
-          합계: {data["일반"].sum.count}건 ({data["일반"].sum.share.toFixed(1)}%)
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-gray-600">금액비중: <span className="font-bold text-green-700">{data["일반"].sum.amountShare.toFixed(1)}%</span></span>
+          <span className="font-bold text-purple-700">건수: {data["일반"].sum.count}건 ({data["일반"].sum.share.toFixed(1)}%)</span>
         </div>
       </div>
 
@@ -93,24 +113,33 @@ export function ProductMatrixTable({
           <div className="grid grid-cols-2 gap-2 text-sm">
             {visibleCategories.map((cat) => (
               <div key={cat.key} className={`p-2 rounded ${cat.bgColor}`}>
-                <span className="text-gray-600">{cat.label}</span>
-                <span className="font-medium ml-2">{data[cat.key].count}건</span>
-                <span className="text-gray-500 ml-1">({data[cat.key].share.toFixed(1)}%)</span>
+                <div className="text-gray-600 font-medium">{cat.label}</div>
+                <div className="text-xs">
+                  {data[cat.key].count}건 ({data[cat.key].share.toFixed(1)}%)
+                </div>
+                <div className="text-xs text-green-700">
+                  금액 {data[cat.key].amountShare.toFixed(1)}%
+                </div>
               </div>
             ))}
             {data["기타"].count > 0 && (
               <div className="p-2 rounded bg-gray-50">
-                <span className="text-gray-600">기타</span>
-                <span className="font-medium ml-2">{data["기타"].count}건</span>
-                <span className="text-gray-500 ml-1">({data["기타"].share.toFixed(1)}%)</span>
+                <div className="text-gray-600 font-medium">기타</div>
+                <div className="text-xs">
+                  {data["기타"].count}건 ({data["기타"].share.toFixed(1)}%)
+                </div>
+                <div className="text-xs text-green-700">
+                  금액 {data["기타"].amountShare.toFixed(1)}%
+                </div>
               </div>
             )}
           </div>
         </div>
       )}
 
-      <div className="text-right text-sm font-medium text-gray-600">
-        총 {totalCount}건
+      <div className="flex justify-between text-sm text-gray-600">
+        <span>총 금액: {formatAmount(data.totalAmount)}원</span>
+        <span>총 {totalCount}건</span>
       </div>
     </div>
   );
@@ -243,10 +272,10 @@ export function ProductMatrixTable({
                 </TableCell>
               </TableRow>
               
-              {/* 비중 */}
+              {/* 건수 비중 */}
               <TableRow className="bg-slate-50">
                 <TableCell className="font-medium border-r bg-slate-100">
-                  비중
+                  건수비중
                 </TableCell>
                 {/* 1타 */}
                 <TableCell className={`text-center border-r ${data["1타"]["20"].share === 0 ? "text-gray-400" : ""}`}>
@@ -291,11 +320,61 @@ export function ProductMatrixTable({
                   {data["기타"].share.toFixed(1)}%
                 </TableCell>
               </TableRow>
+
+              {/* 금액 비중 */}
+              <TableRow className="bg-green-50">
+                <TableCell className="font-medium border-r bg-green-100 text-green-800">
+                  금액비중
+                </TableCell>
+                {/* 1타 */}
+                <TableCell className={`text-center border-r ${data["1타"]["20"].amountShare === 0 ? "text-gray-400" : "text-green-700"}`}>
+                  {data["1타"]["20"].amountShare.toFixed(1)}%
+                </TableCell>
+                <TableCell className={`text-center border-r ${data["1타"]["26"].amountShare === 0 ? "text-gray-400" : "text-green-700"}`}>
+                  {data["1타"]["26"].amountShare.toFixed(1)}%
+                </TableCell>
+                <TableCell className={`text-center border-r ${data["1타"]["32"].amountShare === 0 ? "text-gray-400" : "text-green-700"}`}>
+                  {data["1타"]["32"].amountShare.toFixed(1)}%
+                </TableCell>
+                <TableCell className={`text-center border-r ${data["1타"]["40"].amountShare === 0 ? "text-gray-400" : "text-green-700"}`}>
+                  {data["1타"]["40"].amountShare.toFixed(1)}%
+                </TableCell>
+                <TableCell className="text-center border-r bg-green-200 font-bold text-green-800">
+                  {data["1타"].sum.amountShare.toFixed(1)}%
+                </TableCell>
+                {/* 일반 */}
+                <TableCell className={`text-center border-r ${data["일반"]["20"].amountShare === 0 ? "text-gray-400" : "text-green-700"}`}>
+                  {data["일반"]["20"].amountShare.toFixed(1)}%
+                </TableCell>
+                <TableCell className={`text-center border-r ${data["일반"]["26"].amountShare === 0 ? "text-gray-400" : "text-green-700"}`}>
+                  {data["일반"]["26"].amountShare.toFixed(1)}%
+                </TableCell>
+                <TableCell className={`text-center border-r ${data["일반"]["32"].amountShare === 0 ? "text-gray-400" : "text-green-700"}`}>
+                  {data["일반"]["32"].amountShare.toFixed(1)}%
+                </TableCell>
+                <TableCell className={`text-center border-r ${data["일반"]["40"].amountShare === 0 ? "text-gray-400" : "text-green-700"}`}>
+                  {data["일반"]["40"].amountShare.toFixed(1)}%
+                </TableCell>
+                <TableCell className="text-center border-r bg-green-200 font-bold text-green-800">
+                  {data["일반"].sum.amountShare.toFixed(1)}%
+                </TableCell>
+                {/* 동적 카테고리 */}
+                {visibleCategories.map((cat) => (
+                  <TableCell key={cat.key} className="text-center border-r bg-green-100 font-medium text-green-700">
+                    {data[cat.key].amountShare.toFixed(1)}%
+                  </TableCell>
+                ))}
+                {/* 기타 */}
+                <TableCell className={`text-center ${data["기타"].amountShare === 0 ? "text-gray-400" : "text-green-700"}`}>
+                  {data["기타"].amountShare.toFixed(1)}%
+                </TableCell>
+              </TableRow>
             </TableBody>
           </Table>
         </div>
-        <div className="hidden md:block mt-4 text-right text-sm text-gray-600">
-          총 {totalCount}건
+        <div className="hidden md:flex justify-between mt-4 text-sm text-gray-600">
+          <span>총 금액: {formatAmount(data.totalAmount)}원</span>
+          <span>총 {totalCount}건</span>
         </div>
       </CardContent>
     </Card>

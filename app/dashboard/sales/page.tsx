@@ -20,26 +20,34 @@ import { ReportNotesSection } from "@/components/dashboard/reports/report-notes-
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { ErrorBoundary } from "@/components/error-boundary";
 
+interface ProductMatrixCell {
+  count: number;
+  share: number;
+  amount: number;
+  amountShare: number;
+}
+
 interface ProductMatrixData {
   "1타": {
-    "20": { count: number; share: number };
-    "26": { count: number; share: number };
-    "32": { count: number; share: number };
-    "40": { count: number; share: number };
-    sum: { count: number; share: number };
+    "20": ProductMatrixCell;
+    "26": ProductMatrixCell;
+    "32": ProductMatrixCell;
+    "40": ProductMatrixCell;
+    sum: ProductMatrixCell;
   };
   일반: {
-    "20": { count: number; share: number };
-    "26": { count: number; share: number };
-    "32": { count: number; share: number };
-    "40": { count: number; share: number };
-    sum: { count: number; share: number };
+    "20": ProductMatrixCell;
+    "26": ProductMatrixCell;
+    "32": ProductMatrixCell;
+    "40": ProductMatrixCell;
+    sum: ProductMatrixCell;
   };
-  그룹반: { count: number; share: number };
-  합격보장반: { count: number; share: number };
-  GM: { count: number; share: number };
-  스터디: { count: number; share: number };
-  기타: { count: number; share: number };
+  그룹반: ProductMatrixCell;
+  합격보장반: ProductMatrixCell;
+  GM: ProductMatrixCell;
+  스터디: ProductMatrixCell;
+  기타: ProductMatrixCell;
+  totalAmount: number;
 }
 
 interface SalesData {
@@ -348,40 +356,46 @@ export default function SalesDashboardPage() {
           weeksData: { week: string; "1타": number; 일반: number; 기타: number }[];
           totalCount: number;
         } => {
+          const emptyCell = (): ProductMatrixCell => ({ count: 0, share: 0, amount: 0, amountShare: 0 });
+
           const matrix: ProductMatrixData = {
             "1타": {
-              "20": { count: 0, share: 0 },
-              "26": { count: 0, share: 0 },
-              "32": { count: 0, share: 0 },
-              "40": { count: 0, share: 0 },
-              sum: { count: 0, share: 0 },
+              "20": emptyCell(),
+              "26": emptyCell(),
+              "32": emptyCell(),
+              "40": emptyCell(),
+              sum: emptyCell(),
             },
             일반: {
-              "20": { count: 0, share: 0 },
-              "26": { count: 0, share: 0 },
-              "32": { count: 0, share: 0 },
-              "40": { count: 0, share: 0 },
-              sum: { count: 0, share: 0 },
+              "20": emptyCell(),
+              "26": emptyCell(),
+              "32": emptyCell(),
+              "40": emptyCell(),
+              sum: emptyCell(),
             },
-            그룹반: { count: 0, share: 0 },
-            합격보장반: { count: 0, share: 0 },
-            GM: { count: 0, share: 0 },
-            스터디: { count: 0, share: 0 },
-            기타: { count: 0, share: 0 },
+            그룹반: emptyCell(),
+            합격보장반: emptyCell(),
+            GM: emptyCell(),
+            스터디: emptyCell(),
+            기타: emptyCell(),
+            totalAmount: 0,
           };
 
           let totalCount = 0;
+          let totalAmount = 0;
 
           transactions.forEach((tx) => {
             const count = tx.payment_count_refined || 0;
+            const amount = tx.payment_amount || 0;
             totalCount += count;
+            totalAmount += amount;
 
             const productType = tx.product_type || "";
             const weeks = tx.weeks;
 
             // 상품 타입 결정
             let type: "1타" | "일반" | "그룹반" | "합격보장반" | "GM" | "스터디" | "기타" = "기타";
-            
+
             if (productType.includes("1타")) {
               type = "1타";
             } else if (productType.includes("일반")) {
@@ -400,20 +414,27 @@ export default function SalesDashboardPage() {
             if ((type === "1타" || type === "일반") && weeks && [20, 26, 32, 40].includes(weeks)) {
               const weekKey = weeks.toString() as "20" | "26" | "32" | "40";
               matrix[type][weekKey].count += count;
+              matrix[type][weekKey].amount += amount;
               matrix[type].sum.count += count;
+              matrix[type].sum.amount += amount;
             } else if (type === "1타" || type === "일반") {
               // 1타/일반이지만 주차가 없거나 표준 주차가 아닌 경우 → 기타
               matrix["기타"].count += count;
+              matrix["기타"].amount += amount;
             } else {
               // 그룹반, 합격보장반, GM, 스터디, 기타
               matrix[type].count += count;
+              matrix[type].amount += amount;
             }
           });
 
-          // 비중 계산
+          matrix.totalAmount = totalAmount;
+
+          // 비중 계산 (건수 비중 + 금액 비중)
           Object.keys(matrix).forEach((typeKey) => {
-            const type = typeKey as keyof ProductMatrixData;
-            
+            if (typeKey === "totalAmount") return; // totalAmount는 건너뜀
+            const type = typeKey as Exclude<keyof ProductMatrixData, "totalAmount">;
+
             if (type === "1타" || type === "일반") {
               // 1타, 일반: 주차별 비중 계산
               ["20", "26", "32", "40"].forEach((weekKey) => {
@@ -422,13 +443,21 @@ export default function SalesDashboardPage() {
                   totalCount > 0
                     ? (matrix[type][week].count / totalCount) * 100
                     : 0;
+                matrix[type][week].amountShare =
+                  totalAmount > 0
+                    ? (matrix[type][week].amount / totalAmount) * 100
+                    : 0;
               });
               matrix[type].sum.share =
                 totalCount > 0 ? (matrix[type].sum.count / totalCount) * 100 : 0;
+              matrix[type].sum.amountShare =
+                totalAmount > 0 ? (matrix[type].sum.amount / totalAmount) * 100 : 0;
             } else {
               // 그룹반, 합격보장반, GM, 스터디, 기타: 단순 비중 계산
               matrix[type].share =
                 totalCount > 0 ? (matrix[type].count / totalCount) * 100 : 0;
+              matrix[type].amountShare =
+                totalAmount > 0 ? (matrix[type].amount / totalAmount) * 100 : 0;
             }
           });
 
