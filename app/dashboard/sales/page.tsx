@@ -158,9 +158,6 @@ export default function SalesDashboardPage() {
         const weekStart = currentReport.start_date;
         const weekEnd = currentReport.end_date;
 
-        console.log(`📅 선택된 주차: ${currentReport.title}`);
-        console.log(`📅 기간: ${weekStart} ~ ${weekEnd}`);
-
         // 날짜 계산 (전주, 전년)
         // Format dates for SQL (정의를 먼저 해야 함!)
         const formatDate = (d: Date | string) => {
@@ -298,11 +295,6 @@ export default function SalesDashboardPage() {
           .from("edu_product_sales")
           .select("*")
           .eq("report_id", reportId) : { data: null };
-
-        console.log(`✓ 현재 주차: ${currentWeekTxData?.length || 0}건`);
-        console.log(`✓ 전주: ${prevWeekTxData?.length || 0}건`);
-        console.log(`✓ 전년: ${prevYearTx?.length || 0}건`);
-        console.log(`✓ 환불: ${currentWeekRefunds?.length || 0}건`);
 
         // 집계 함수
         const aggregateRevenue = (transactions: any[]) => {
@@ -516,25 +508,9 @@ export default function SalesDashboardPage() {
           return { matrix, typeData, weeksData, totalCount };
         };
 
-        console.log(`🎯 상품 매트릭스 계산 시작`);
-        console.log(`📦 거래 데이터: ${currentWeekTx?.length || 0}건`);
-        if (currentWeekTx && currentWeekTx.length > 0) {
-          console.log(`샘플 거래 상품 타입:`, currentWeekTx[0].product_type);
-          console.log(`샘플 거래 주차:`, currentWeekTx[0].weeks);
-          console.log(`샘플 거래 결제건수 (refined):`, currentWeekTx[0].payment_count_refined);
-          console.log(`전체 거래 상품 타입 목록:`, currentWeekTx.map(tx => tx.product_type));
-          console.log(`전체 거래 주차 목록:`, currentWeekTx.map(tx => tx.weeks));
-          console.log(`전체 거래 건수 목록:`, currentWeekTx.map(tx => tx.payment_count_refined));
-        }
-
         const productMatrixResult = calculateProductMatrix(
           currentWeekTxData || []
         );
-
-        console.log(`📊 매트릭스 1타 합계:`, productMatrixResult.matrix["1타"].sum.count);
-        console.log(`📊 매트릭스 일반 합계:`, productMatrixResult.matrix["일반"].sum.count);
-        console.log(`📊 매트릭스 기타:`, productMatrixResult.matrix["기타"].count);
-        console.log(`📊 총 건수:`, productMatrixResult.totalCount);
 
         // 트렌드 데이터 생성 (최근 12주)
         const generateTrendData = async () => {
@@ -625,9 +601,7 @@ export default function SalesDashboardPage() {
               const netRevenue2024 = grossRevenue2024 - refundAmount2024;
 
               const weekLabel = report.title || `W${i + 1}`;
-              
-              console.log(`📊 ${weekLabel}: 결제=${payments2025?.length || 0}건, 환불=${refunds2025?.length || 0}건, 실매출=${grossRevenue}원, 환불액=${refundAmount}원, 순매출=${netRevenue}원`);
-              
+
               weeklyData.push({
                 label: weekLabel,
                 netRevenue2025: netRevenue,
@@ -653,8 +627,6 @@ export default function SalesDashboardPage() {
               monthData.netRevenue2024 += netRevenue2024;
               monthData.refund += refundAmount;
             }
-
-            console.log("📊 매출 추이 데이터 생성 완료:", weeklyData.length, "주");
 
             return {
               weeklyData,

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import type { SalesTransaction } from "@/lib/types";
+import { formatChartKoreanCurrency } from "@/lib/utils/format";
 
 interface TrendTabProps {
   currentWeekTx: SalesTransaction[];
@@ -120,14 +121,8 @@ export function TrendTab({
   const yoyData = calculateYoYComparison();
   const customerData = calculateCustomerAnalysis();
 
-  const formatCurrency = (amount: number) => {
-    const eok = amount / 100000000;
-    if (eok >= 1) {
-      return `${eok.toFixed(1)}억`;  // 1.8억, 2.3억 같이 표시
-    }
-    const man = Math.floor(amount / 10000);
-    return `${man.toLocaleString()}만`;
-  };
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatChartKoreanCurrency;
 
   const maxDecline = Math.min(...yoyData.filter((m) => m.change < 0).map((m) => m.change));
 

@@ -16,6 +16,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { formatChartCurrency, formatPercent } from "@/lib/utils/format";
 
 interface WeeklyData {
   week: string;
@@ -47,12 +48,8 @@ export function RevenueIntelligenceChart({ weeklyData, loading }: RevenueIntelli
     );
   }
 
-  const formatCurrency = (value: number) => {
-    const million = Math.floor(value / 10000);
-    return `${million.toLocaleString()}만`;
-  };
-
-  const formatPercent = (value: number) => `${value.toFixed(1)}%`;
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatChartCurrency;
 
   // Custom Tooltip
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -290,6 +287,10 @@ export function RevenueIntelligenceChart({ weeklyData, loading }: RevenueIntelli
     </Card>
   );
 }
+
+
+
+
 
 
 

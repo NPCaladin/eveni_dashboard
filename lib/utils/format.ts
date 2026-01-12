@@ -71,6 +71,53 @@ export function formatTooltipCurrency(value: number): string {
   return `${value.toLocaleString()}원`;
 }
 
+/**
+ * 만원 단위로 포맷팅 (suffix 포함)
+ * @param value - 포맷팅할 금액
+ * @returns 포맷팅된 문자열 (예: "1,234만원")
+ */
+export function formatManwon(value: number): string {
+  const millions = Math.floor(value / 10000);
+  return `${millions.toLocaleString()}만원`;
+}
+
+/**
+ * Intl.NumberFormat 기반 원화 포맷팅
+ * @param value - 포맷팅할 금액
+ * @returns 포맷팅된 문자열 (예: "₩1,234,567")
+ */
+export function formatIntlCurrency(value: number | string): string {
+  return new Intl.NumberFormat("ko-KR", {
+    style: "currency",
+    currency: "KRW",
+    maximumFractionDigits: 0,
+  }).format(Number(value));
+}
+
+/**
+ * 차트용 억/만 단위 포맷팅 (원 suffix 없음)
+ * @param value - 포맷팅할 금액
+ * @returns 포맷팅된 문자열 (예: "1억 2,000만")
+ */
+export function formatChartKoreanCurrency(value: number): string {
+  const eok = Math.floor(value / 100000000);
+  const man = Math.floor((value % 100000000) / 10000);
+
+  if (eok > 0 && man > 0) {
+    return `${eok}억 ${man.toLocaleString()}만`;
+  } else if (eok > 0) {
+    return `${eok}억`;
+  } else if (man > 0) {
+    return `${man.toLocaleString()}만`;
+  } else {
+    return value.toLocaleString();
+  }
+}
+
+
+
+
+
 
 
 

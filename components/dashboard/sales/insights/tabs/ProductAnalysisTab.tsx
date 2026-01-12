@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { SalesTransaction } from "@/lib/types";
+import { formatChartCurrency } from "@/lib/utils/format";
 
 interface ProductAnalysisTabProps {
   currentWeekTx: SalesTransaction[];
@@ -155,10 +156,8 @@ export function ProductAnalysisTab({
   const oneTaRatio = calculate1taRatio();
   const weeksPerformance = calculateWeeksPerformance();
 
-  const formatCurrency = (amount: number) => {
-    const millions = Math.floor(amount / 10000);
-    return `${millions.toLocaleString()}만`;
-  };
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatChartCurrency;
 
   const minRatio = Math.min(...oneTaRatio.filter((m) => m.ratio > 0).map((m) => m.ratio));
   const maxRatio = Math.max(...oneTaRatio.map((m) => m.ratio));

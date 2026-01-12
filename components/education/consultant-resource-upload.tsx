@@ -139,8 +139,6 @@ export function ConsultantResourceUpload() {
         throw new Error("업로드할 데이터가 없습니다.");
       }
 
-      console.log(`📊 파싱된 컨설턴트 리소스: ${resources.length}건`, resources);
-
       // 기존 데이터 삭제
       const { error: deleteError } = await supabase
         .from("consultant_resources")

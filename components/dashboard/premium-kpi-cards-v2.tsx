@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, TrendingDown, Target, DollarSign, Calendar, Zap, Users, Package } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { formatKoreanCurrency, formatPercent } from "@/lib/utils/format";
 
 interface KPIDataV2 {
   // 매출 데이터
@@ -80,16 +81,8 @@ export function PremiumKPICardsV2({ data, loading }: PremiumKPICardsV2Props) {
     );
   }
 
-  const formatCurrency = (value: number) => {
-    const billion = Math.floor(value / 100000000);
-    const million = Math.floor((value % 100000000) / 10000);
-    if (billion > 0) {
-      return `${billion.toLocaleString()}억 ${million.toLocaleString()}만원`;
-    }
-    return `${million.toLocaleString()}만원`;
-  };
-
-  const formatPercent = (value: number) => `${value.toFixed(1)}%`;
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatKoreanCurrency;
 
   // 계산
   const netRevenue = data.weeklyNetRevenue;
@@ -402,6 +395,10 @@ export function PremiumKPICardsV2({ data, loading }: PremiumKPICardsV2Props) {
     </div>
   );
 }
+
+
+
+
 
 
 

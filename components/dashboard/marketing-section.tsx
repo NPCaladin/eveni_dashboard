@@ -13,19 +13,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import type { Database } from "@/lib/supabase/types";
-
-type MarketingMetric = {
-  id: string;
-  report_id: string;
-  channel: string;
-  cost: number;
-  db_count: number;
-  consultation_db_count: number;
-  conversion_rate: number | null;
-  type: string;
-  created_at: string;
-};
+import type { MarketingMetric } from "@/lib/types/dashboard";
 
 interface MarketingSectionProps {
   metrics: MarketingMetric[];

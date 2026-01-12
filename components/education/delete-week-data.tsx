@@ -61,8 +61,6 @@ export function DeleteWeekData() {
     setDeleting(true);
 
     try {
-      console.log(`🗑️ 주차 데이터 삭제 시작 (report_id: ${reportId})`);
-
       let totalDeleted = 0;
 
       // sales_transactions 삭제
@@ -121,8 +119,6 @@ export function DeleteWeekData() {
         .eq("report_id", reportId);
 
       if (notesError) throw notesError;
-
-      console.log(`✅ 주차 데이터 삭제 완료 (${totalDeleted}건)`);
 
       toast({
         title: "삭제 완료",

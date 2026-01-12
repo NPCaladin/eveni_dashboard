@@ -36,7 +36,6 @@ export function ReportNotesSection({ reportId }: ReportNotesSectionProps) {
 
         if (fetchError) throw fetchError;
 
-        console.log(`✓ 보고 사항 로드 완료`);
         setContent((data as any)?.content || "");
       } catch (err) {
         console.error("Error loading report notes:", err);

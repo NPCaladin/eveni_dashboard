@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown } from "lucide-react";
+import { formatManwon } from "@/lib/utils/format";
 
 interface MetricCardProps {
   title: string;
@@ -105,11 +106,8 @@ export function RevenueMetricCards({
   prevWeekRefund,
   prevYearRefund,
 }: RevenueMetricCardsProps) {
-  // 포맷 함수
-  const formatCurrency = (amount: number) => {
-    const millions = Math.floor(amount / 10000);
-    return `${millions.toLocaleString()}만원`;
-  };
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatManwon;
 
   // 증감률 계산
   const calculateChange = (current: number, previous?: number) => {

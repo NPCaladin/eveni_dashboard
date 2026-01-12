@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown } from "lucide-react";
+import { formatManwon } from "@/lib/utils/format";
 
 interface RefundCardProps {
   title: string;
@@ -22,10 +23,8 @@ function RefundCard({
   showRefundRate,
   refundRate,
 }: RefundCardProps) {
-  const formatCurrency = (amt: number) => {
-    const millions = Math.floor(amt / 10000);
-    return `${millions.toLocaleString()}만원`;
-  };
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatManwon;
 
   const formatBigCurrency = (amt: number) => {
     const billions = amt / 100000000;

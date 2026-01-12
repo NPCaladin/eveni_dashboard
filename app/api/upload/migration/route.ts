@@ -290,18 +290,11 @@ export async function POST(request: NextRequest) {
       }
 
       // transactions insert: 기존 삭제 후 batch insert
-      console.log(`🗑️  삭제 시작: report_id=${reportId}`);
       const { data: deletedData, error: deleteError } = await supabase
         .from("sales_transactions")
         .delete()
         .eq("report_id", reportId);
       
-      if (deleteError) {
-        console.error("❌ 삭제 실패:", deleteError);
-      } else {
-        console.log(`✅ 삭제 완료`);
-      }
-
       const txPayload = rows.map((r) => {
         const { category, week } = parseProductInfo(r.product_name);
         const sellerTeam = getSellerTeam(r.seller);
@@ -348,14 +341,11 @@ export async function POST(request: NextRequest) {
         };
       });
 
-      console.log(`📝 삽입 시작: ${txPayload.length}건`);
       for (const batch of chunk(txPayload, 300)) {
         const { error: insertError } = await supabase.from("sales_transactions").insert(batch);
         if (insertError) {
-          console.error("❌ 삽입 실패:", insertError);
           return NextResponse.json({ error: insertError.message }, { status: 500 });
         }
-        console.log(`✅ 배치 삽입 완료: ${batch.length}건`);
       }
 
       // 집계

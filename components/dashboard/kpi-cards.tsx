@@ -4,36 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import type { Database } from "@/lib/supabase/types";
+import { formatIntlCurrency } from "@/lib/utils/format";
+import type { MarketingMetric, RefundSummaryRow } from "@/lib/types/dashboard";
 
 type RevenueStat = Database["public"]["Tables"]["edu_revenue_stats"]["Row"];
-type MarketingMetric = {
-  id: string;
-  report_id: string;
-  channel: string;
-  cost: number;
-  db_count: number;
-  consultation_db_count: number;
-  conversion_rate: number | null;
-  type: string;
-  created_at: string;
-};
-type RefundSummary = {
-  id: string;
-  report_id: string;
-  category: string;
-  weekly_val: number;
-  prev_weekly_val: number;
-  yoy_val: number;
-  monthly_cum_val: number;
-  yearly_cum_val: number;
-  note: string | null;
-  created_at: string;
-};
 
 interface KPICardsProps {
   revenueStats: RevenueStat[];
   marketingMetrics: MarketingMetric[];
-  refundSummary: RefundSummary[];
+  refundSummary: RefundSummaryRow[];
   loading: boolean;
 }
 
@@ -75,13 +54,8 @@ export function KPICards({ revenueStats, marketingMetrics, refundSummary, loadin
     );
   }
 
-  const formatCurrency = (value: number | string) => {
-    return new Intl.NumberFormat("ko-KR", {
-      style: "currency",
-      currency: "KRW",
-      maximumFractionDigits: 0,
-    }).format(Number(value));
-  };
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatIntlCurrency;
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

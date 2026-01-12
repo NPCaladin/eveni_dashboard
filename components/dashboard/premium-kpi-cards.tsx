@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, TrendingDown, AlertTriangle, RefreshCw } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
+import { formatKoreanCurrency, formatPercent } from "@/lib/utils/format";
 
 interface KPIData {
   weeklyNetRevenue: number;
@@ -45,16 +46,8 @@ export function PremiumKPICards({ data, loading }: PremiumKPICardsProps) {
     );
   }
 
-  const formatCurrency = (value: number) => {
-    const billion = Math.floor(value / 100000000);
-    const million = Math.floor((value % 100000000) / 10000);
-    if (billion > 0) {
-      return `${billion.toLocaleString()}억 ${million.toLocaleString()}만원`;
-    }
-    return `${million.toLocaleString()}만원`;
-  };
-
-  const formatPercent = (value: number) => `${value.toFixed(1)}%`;
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatKoreanCurrency;
 
   // 1. Weekly Net Revenue
   const netRevenue = data.weeklyNetRevenue;

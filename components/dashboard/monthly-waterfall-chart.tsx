@@ -13,6 +13,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
+import { formatChartCurrency } from "@/lib/utils/format";
 
 interface MonthlyData {
   month: number;
@@ -44,10 +45,8 @@ export function MonthlyWaterfallChart({ monthlyData, targetRevenue, loading }: M
     );
   }
 
-  const formatCurrency = (value: number) => {
-    const million = Math.floor(value / 10000);
-    return `${million.toLocaleString()}만`;
-  };
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatChartCurrency;
 
   // Waterfall 데이터 생성 (누적 방식)
   let cumulativeRevenue = 0;

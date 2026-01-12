@@ -21,6 +21,7 @@ import {
 } from "recharts";
 import { Badge } from "@/components/ui/badge";
 import type { Database } from "@/lib/supabase/types";
+import { formatIntlCurrency } from "@/lib/utils/format";
 
 type RevenueStat = Database["public"]["Tables"]["edu_revenue_stats"]["Row"];
 type ProductSale = Database["public"]["Tables"]["edu_product_sales"]["Row"];
@@ -82,13 +83,8 @@ export function EducationSection({
     );
   }
 
-  const formatCurrency = (value: number | string) => {
-    return new Intl.NumberFormat("ko-KR", {
-      style: "currency",
-      currency: "KRW",
-      maximumFractionDigits: 0,
-    }).format(Number(value));
-  };
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatIntlCurrency;
 
   // 매출 데이터 정리 (실매출/순매출/환불을 한 줄로 집계)
   const revenueSummary = (() => {

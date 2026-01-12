@@ -25,6 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatManwon } from "@/lib/utils/format";
 
 interface ProductData {
   category: string; // "1타", "일반"
@@ -101,10 +102,8 @@ export function ProductAnalyticsGrid({
     retention: "#f59e0b",
   };
 
-  const formatCurrency = (value: number) => {
-    const million = Math.floor(value / 10000);
-    return `${million.toLocaleString()}만원`;
-  };
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatManwon;
 
   // Double Donut용 데이터
   const innerDonutData = productData.map((d) => ({

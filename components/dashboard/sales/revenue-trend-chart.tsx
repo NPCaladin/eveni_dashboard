@@ -17,6 +17,7 @@ import {
   Area,
   ComposedChart,
 } from "recharts";
+import { formatChartKoreanCurrency, formatKoreanCurrency } from "@/lib/utils/format";
 
 interface TrendData {
   label: string;
@@ -38,31 +39,9 @@ export function RevenueTrendChart({
     "weekly"
   );
 
-  const formatCurrency = (value: number) => {
-    const eok = Math.floor(value / 100000000);
-    const man = Math.floor((value % 100000000) / 10000);
-    
-    if (eok > 0) {
-      if (man > 0) {
-        return `${eok}억 ${man.toLocaleString()}만`;
-      }
-      return `${eok}억`;
-    }
-    return `${man.toLocaleString()}만`;
-  };
-
-  const formatTooltip = (value: number) => {
-    const eok = Math.floor(value / 100000000);
-    const man = Math.floor((value % 100000000) / 10000);
-    
-    if (eok > 0) {
-      if (man > 0) {
-        return `${eok}억 ${man.toLocaleString()}만원`;
-      }
-      return `${eok}억원`;
-    }
-    return `${man.toLocaleString()}만원`;
-  };
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatChartKoreanCurrency;
+  const formatTooltip = formatKoreanCurrency;
 
   const getData = () => {
     switch (activeTab) {

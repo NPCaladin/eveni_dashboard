@@ -195,6 +195,37 @@ export interface RefundDetail {
 // 공통 타입
 // ============================================
 
+/**
+ * 마케팅 메트릭 타입 (marketing_metrics 테이블 Row)
+ */
+export interface MarketingMetric {
+  id: string;
+  report_id: string;
+  channel: string;
+  cost: number;
+  db_count: number;
+  consultation_db_count: number;
+  conversion_rate: number | null;
+  type: string;
+  created_at: string;
+}
+
+/**
+ * 환불 요약 Row 타입 (edu_refund_summary 테이블 Row)
+ */
+export interface RefundSummaryRow {
+  id: string;
+  report_id: string;
+  category: string;
+  weekly_val: number;
+  prev_weekly_val: number;
+  yoy_val: number;
+  monthly_cum_val: number;
+  yearly_cum_val: number;
+  note: string | null;
+  created_at: string;
+}
+
 export interface LoadingState {
   isLoading: boolean;
   error: string | null;

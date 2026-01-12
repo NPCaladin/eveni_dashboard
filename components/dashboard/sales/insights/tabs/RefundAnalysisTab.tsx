@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import type { SalesTransaction } from "@/lib/types";
+import { formatChartCurrency, formatKoreanCurrency } from "@/lib/utils/format";
 
 interface RefundAnalysisTabProps {
   allTransactions: SalesTransaction[];
@@ -84,19 +85,9 @@ export function RefundAnalysisTab({
 
   const refundReasons = calculateRefundReasons();
 
-  const formatCurrency = (amount: number) => {
-    const millions = Math.floor(amount / 10000);
-    return `${millions.toLocaleString()}만`;
-  };
-
-  const formatCurrencyDetailed = (amount: number) => {
-    const eok = Math.floor(amount / 100000000);
-    const man = Math.floor((amount % 100000000) / 10000);
-    if (eok > 0) {
-      return `${eok.toLocaleString()}억 ${man.toLocaleString()}만`;
-    }
-    return `${man.toLocaleString()}만원`;
-  };
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatChartCurrency;
+  const formatCurrencyDetailed = formatKoreanCurrency;
 
   // 인사이트 생성
   const generateInsights = (): string[] => {

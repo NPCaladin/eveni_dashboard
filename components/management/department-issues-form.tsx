@@ -267,9 +267,7 @@ export function DepartmentIssuesForm() {
           const editorKey = `content-${category}-${index}`;
           const editor = editorRefs.current[editorKey];
           const htmlContent = editor ? editor.innerHTML : (item.content || "");
-          
-          console.log(`Saving ${category} item ${index}:`, htmlContent); // 디버깅용
-          
+
           if (htmlContent.trim() && htmlContent !== "<br>" && htmlContent !== "") {
             insertData.push({
               report_id: reportId,
@@ -281,8 +279,6 @@ export function DepartmentIssuesForm() {
           }
         });
       });
-
-      console.log("Insert data:", insertData); // 디버깅용
 
       if (insertData.length > 0) {
         const { error: insertError } = await supabase

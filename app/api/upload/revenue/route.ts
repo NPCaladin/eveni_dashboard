@@ -281,7 +281,6 @@ export async function POST(request: NextRequest) {
 
     // 헤더 추출
     const headers = data[0] as string[];
-    console.log("엑셀 헤더:", headers);
 
     // 헤더 매핑
     const headerMap: { [key: number]: string } = {};
@@ -300,8 +299,6 @@ export async function POST(request: NextRequest) {
         }
       }
     });
-
-    console.log("헤더 매핑 결과:", headerMap);
 
     // 데이터 파싱
     const transactions: any[] = [];
@@ -492,8 +489,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log(`총 ${transactions.length}건의 거래 파싱 완료`);
-
     if (transactions.length === 0) {
       return NextResponse.json(
         {
@@ -522,10 +517,6 @@ export async function POST(request: NextRequest) {
     const weekEndDate = weekInfo?.end_date || "2025-12-31";
 
     // 기존 해당 주차 데이터 삭제
-    console.log(`🗑️ 기존 데이터 삭제 중...`);
-    console.log(`   - report_id: ${reportId}`);
-    console.log(`   - 날짜 범위: ${weekStartDate} ~ ${weekEndDate}`);
-    
     // 삭제 전략:
     // 1. report_id로 삭제 (같은 주차의 모든 거래)
     // 2. 날짜 범위 + report_id NULL (오래된 중복 데이터)
@@ -537,12 +528,6 @@ export async function POST(request: NextRequest) {
       .delete()
       .eq("report_id", reportId);
 
-    if (deleteError1) {
-      console.error("Delete by report_id error:", deleteError1);
-    } else {
-      console.log(`   ✓ report_id로 삭제 완료`);
-    }
-
     // 방법 2: 결제일 기준 날짜 범위 + report_id NULL (결제 거래 중복 제거)
     const { error: deleteError2 } = await supabase
       .from("sales_transactions")
@@ -551,12 +536,6 @@ export async function POST(request: NextRequest) {
       .lte("payment_date", weekEndDate)
       .is("report_id", null)
       .eq("status", "결"); // 결제 거래만
-
-    if (deleteError2) {
-      console.error("Delete payment tx error:", deleteError2);
-    } else {
-      console.log(`   ✓ 결제 거래 중복 제거 완료`);
-    }
 
     // 방법 3: 환불일 기준 날짜 범위 + report_id NULL (환불 중복 제거)
     // 단, 결제일이 이 주차 범위 밖인 것만 (과거 결제 + 현재 환불)
@@ -569,18 +548,10 @@ export async function POST(request: NextRequest) {
       .eq("status", "환")
       .or(`payment_date.lt.${weekStartDate},payment_date.gt.${weekEndDate}`); // 결제일이 주차 범위 밖
 
-    if (deleteError3) {
-      console.error("Delete refund tx error:", deleteError3);
-    } else {
-      console.log(`   ✓ 과거 결제 환불 중복 제거 완료`);
-    }
-
     // sales_transactions 테이블에 저장
-    console.log(`💾 새 데이터 저장 중... (${refinedTransactions.length}건)`);
     const { error: insertError } = await supabase.from("sales_transactions").insert(refinedTransactions);
 
     if (insertError) {
-      console.error("Insert error:", insertError);
       return NextResponse.json(
         { error: `데이터 저장 실패: ${insertError.message}` },
         { status: 500 }

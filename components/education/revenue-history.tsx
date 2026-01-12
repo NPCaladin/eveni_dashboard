@@ -14,6 +14,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { formatIntlCurrency } from "@/lib/utils/format";
 
 type FlatRow = {
   report_id: string;
@@ -146,8 +147,8 @@ export function RevenueHistory() {
     return result.sort((a, b) => (a.start_date < b.start_date ? 1 : -1)); // desc
   }, [rows, startFilter, endFilter]);
 
-  const formatCurrency = (v: number) =>
-    new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(v);
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatIntlCurrency;
 
   return (
     <Card>

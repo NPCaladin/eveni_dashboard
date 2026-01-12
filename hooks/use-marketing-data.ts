@@ -80,7 +80,6 @@ export function useMarketingData(
       try {
         // 현재 보고서의 start_date가 없으면 중단
         if (!currentReport?.start_date) {
-          console.log("currentReport.start_date is missing");
           setLoading(false);
           return;
         }

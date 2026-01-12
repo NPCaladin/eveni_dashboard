@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import type { SalesTransaction } from "@/lib/types";
+import { formatManwon } from "@/lib/utils/format";
 
 interface SalesAnalysisTabProps {
   currentWeekTx: SalesTransaction[];
@@ -126,10 +127,8 @@ export function SalesAnalysisTab({
       ? ((avgOrderValue - prevAvgOrderValue) / prevAvgOrderValue) * 100
       : 0;
 
-  const formatCurrency = (amount: number) => {
-    const millions = Math.floor(amount / 10000);
-    return `${millions.toLocaleString()}만원`;
-  };
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatManwon;
 
   const getMedalEmoji = (index: number) => {
     switch (index) {

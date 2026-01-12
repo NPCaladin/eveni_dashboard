@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Users, TrendingUp, Clock, AlertCircle, CheckCircle } from "lucide-react";
+import { formatIntlCurrency } from "@/lib/utils/format";
 
 interface MentoringMetrics {
   totalMentees: number;
@@ -76,13 +77,8 @@ export function OperationalLogs({
     );
   }
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("ko-KR", {
-      style: "currency",
-      currency: "KRW",
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatIntlCurrency;
 
   const getPriorityColor = (priority: string) => {
     if (priority === "high") return "bg-rose-100 text-rose-700 border-rose-300";

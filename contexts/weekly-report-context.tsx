@@ -77,12 +77,10 @@ export function WeeklyReportProvider({ children }: { children: ReactNode }) {
 
   // reportId 변경 시 currentReport 업데이트 및 localStorage 저장
   const setReportId = (id: string | null) => {
-    console.log("[WeeklyReportContext] setReportId called:", id);
     setReportIdState(id);
     if (id) {
       localStorage.setItem("selectedReportId", id);
       const report = reports.find((r) => r.id === id);
-      console.log("[WeeklyReportContext] Found report:", report?.title);
       setCurrentReport(report || null);
     } else {
       localStorage.removeItem("selectedReportId");

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatNumber } from "@/lib/utils/format";
 
 interface RefundDetail {
   refund_date: string;
@@ -26,9 +27,8 @@ interface RefundDetailTableProps {
 }
 
 export function RefundDetailTable({ refunds }: RefundDetailTableProps) {
-  const formatCurrency = (amount: number) => {
-    return amount.toLocaleString();
-  };
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = formatNumber;
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);

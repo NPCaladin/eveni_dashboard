@@ -54,12 +54,10 @@ export function ConsultantResourceSection({
         if (fetchError) throw fetchError;
 
         if (!data || data.length === 0) {
-          console.log(`⚠️ 컨설턴트 리소스 데이터 없음 (report_id: ${reportId})`);
           setConsultants([]);
           return;
         }
 
-        console.log(`✓ 컨설턴트 리소스 로드: ${data.length}명`);
         setConsultants(data);
       } catch (err) {
         console.error("Error loading consultant resources:", err);

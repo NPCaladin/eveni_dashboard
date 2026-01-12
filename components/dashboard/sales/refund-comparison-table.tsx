@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatChartCurrency } from "@/lib/utils/format";
 
 interface RefundComparisonData {
   weekly: { count: number; amount: number };
@@ -30,10 +31,8 @@ export function RefundComparisonTable({ data, currentMonth }: RefundComparisonTa
     "7월", "8월", "9월", "10월", "11월", "12월"
   ];
   const monthLabel = currentMonth ? monthNames[currentMonth - 1] || "12월" : "12월";
-  const formatCurrency = (amount: number) => {
-    const millions = Math.floor(amount / 10000);
-    return millions.toLocaleString();
-  };
+  // 포맷 함수는 lib/utils/format.ts에서 import
+  const formatCurrency = (amount: number) => formatChartCurrency(amount).replace("만", "");
 
   const formatLargeCurrency = (amount: number) => {
     const billions = amount / 100000000;

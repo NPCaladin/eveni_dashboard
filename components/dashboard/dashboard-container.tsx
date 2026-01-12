@@ -4,20 +4,10 @@ import { useState, useEffect } from "react";
 import { useWeeklyReport } from "@/hooks/use-weekly-report";
 import { supabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
+import type { MarketingMetric, RefundSummaryRow } from "@/lib/types/dashboard";
 
 type RevenueStat = Database["public"]["Tables"]["edu_revenue_stats"]["Row"];
 type ProductSale = Database["public"]["Tables"]["edu_product_sales"]["Row"];
-type MarketingMetric = {
-  id: string;
-  report_id: string;
-  channel: string;
-  cost: number;
-  db_count: number;
-  consultation_db_count: number;
-  conversion_rate: number | null;
-  type: string;
-  created_at: string;
-};
 type ConsultantResource = Database["public"]["Tables"]["consultant_resources"]["Row"];
 type MgmtReport = {
   id: string;
@@ -29,18 +19,7 @@ type MgmtReport = {
   created_at: string;
 };
 type MentoringReport = Database["public"]["Tables"]["edu_mentoring_reports"]["Row"];
-type RefundSummary = {
-  id: string;
-  report_id: string;
-  category: string;
-  weekly_val: number;
-  prev_weekly_val: number;
-  yoy_val: number;
-  monthly_cum_val: number;
-  yearly_cum_val: number;
-  note: string | null;
-  created_at: string;
-};
+type RefundSummary = RefundSummaryRow;
 type ConsultantAvailability = {
   id: string;
   report_id: string;
@@ -76,15 +55,12 @@ export function DashboardContainer({ children }: { children: (data: DashboardDat
 
   useEffect(() => {
     async function loadData() {
-      console.log("[DashboardContainer] reportId changed:", reportId);
       if (!reportId) {
-        console.log("[DashboardContainer] No reportId, clearing data");
         setData(null);
         setLoading(false);
         return;
       }
 
-      console.log("[DashboardContainer] Loading data for reportId:", reportId);
       setLoading(true);
       setData(null);
       try {
@@ -163,11 +139,6 @@ export function DashboardContainer({ children }: { children: (data: DashboardDat
           refundSummary: getData(refundSummaryResult),
           reportNotes: getData(reportNotesResult),
         };
-        console.log("[DashboardContainer] Data loaded:", {
-          reportId,
-          revenueStatsCount: loadedData.revenueStats.length,
-          productSalesCount: loadedData.productSales.length,
-        });
         setData(loadedData);
       } catch (error) {
         console.error("[DashboardContainer] Error loading dashboard data:", error);
