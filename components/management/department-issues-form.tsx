@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Plus, X } from "lucide-react";
 import type { Database } from "@/lib/supabase/types";
+import { handleUploadError, handleSaveError, showSaveSuccess, showWarning, showUploadSuccess } from "@/lib/utils/error";
 
 type MgmtReport = {
   id: string;
@@ -213,18 +214,9 @@ export function DepartmentIssuesForm() {
             );
           }
 
-          toast({
-            title: "이미지 삽입 완료",
-            description: "이미지가 성공적으로 삽입되었습니다.",
-          });
+          showUploadSuccess(toast, "이미지가 성공적으로 삽입되었습니다.");
         } catch (error: unknown) {
-          console.error("Image upload error:", error);
-          const errorMessage = error instanceof Error ? error.message : "이미지 업로드 중 오류가 발생했습니다.";
-          toast({
-            title: "이미지 삽입 실패",
-            description: errorMessage,
-            variant: "destructive",
-          });
+          handleUploadError(error, toast);
         } finally {
           setUploading(false);
         }
@@ -235,11 +227,7 @@ export function DepartmentIssuesForm() {
 
   const handleSave = async () => {
     if (!reportId) {
-      toast({
-        title: "오류",
-        description: "주차를 선택해주세요.",
-        variant: "destructive",
-      });
+      showWarning(toast, "주차 미선택", "주차를 선택해주세요.");
       return;
     }
 
@@ -289,17 +277,9 @@ export function DepartmentIssuesForm() {
         if (insertError) throw insertError;
       }
 
-      toast({
-        title: "저장 완료",
-        description: "부서별 이슈가 성공적으로 저장되었습니다.",
-      });
-    } catch (error) {
-      console.error("Error saving issues:", error);
-      toast({
-        title: "저장 실패",
-        description: "데이터 저장 중 오류가 발생했습니다.",
-        variant: "destructive",
-      });
+      showSaveSuccess(toast, "부서별 이슈가 성공적으로 저장되었습니다.");
+    } catch (error: unknown) {
+      handleSaveError(error, toast);
     } finally {
       setSaving(false);
     }

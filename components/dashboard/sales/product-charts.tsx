@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis } from "recharts";
 
@@ -23,7 +24,7 @@ interface ProductChartsProps {
   totalCount: number;
 }
 
-export function ProductCharts({
+export const ProductCharts = memo(function ProductCharts({
   typeData,
   weeksData,
   totalCount,
@@ -111,6 +112,4 @@ export function ProductCharts({
       </Card>
     </div>
   );
-}
-
-
+});

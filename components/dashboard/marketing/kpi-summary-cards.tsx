@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { formatCurrency, formatPercent } from "@/lib/utils/format";
@@ -28,7 +29,7 @@ interface KpiCardProps {
   isPositiveGood?: boolean;
 }
 
-function KpiCard({ title, value, changeRate, isPositiveGood = true }: KpiCardProps) {
+const KpiCard = memo(function KpiCard({ title, value, changeRate, isPositiveGood = true }: KpiCardProps) {
   const isIncrease = changeRate > 0;
   const isGood = isPositiveGood ? isIncrease : !isIncrease;
   
@@ -56,9 +57,9 @@ function KpiCard({ title, value, changeRate, isPositiveGood = true }: KpiCardPro
       </CardContent>
     </Card>
   );
-}
+});
 
-export function KpiSummaryCards({ data }: KpiSummaryCardsProps) {
+export const KpiSummaryCards = memo(function KpiSummaryCards({ data }: KpiSummaryCardsProps) {
   // 전주 대비 증감율 계산
   const spendChange = data.prevWeek.totalSpend
     ? ((data.totalSpend - data.prevWeek.totalSpend) / data.prevWeek.totalSpend) * 100
@@ -104,7 +105,9 @@ export function KpiSummaryCards({ data }: KpiSummaryCardsProps) {
       />
     </div>
   );
-}
+});
+
+
 
 
 

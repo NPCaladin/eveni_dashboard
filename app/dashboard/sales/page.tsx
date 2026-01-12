@@ -18,6 +18,7 @@ import { ConsultantResourceSection } from "@/components/dashboard/resources/cons
 import { MentorSection } from "@/components/dashboard/mentor/mentor-section";
 import { ReportNotesSection } from "@/components/dashboard/reports/report-notes-section";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 interface ProductMatrixData {
   "1타": {
@@ -975,116 +976,132 @@ export default function SalesDashboardPage() {
         ) : (
           <>
             {/* Section 1: 매출 현황 */}
-            <section>
-              <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
-                📊 매출 현황
-              </h2>
-              {data && (
-                <>
-                  <RevenueMetricCards {...data.revenueMetrics} />
-                  <RevenueComparisonTable 
-                    data={data.comparisonData} 
-                    currentMonth={data.comparisonData.currentMonth}
-                  />
-                </>
-              )}
-            </section>
+            <ErrorBoundary>
+              <section>
+                <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
+                  📊 매출 현황
+                </h2>
+                {data && (
+                  <>
+                    <RevenueMetricCards {...data.revenueMetrics} />
+                    <RevenueComparisonTable
+                      data={data.comparisonData}
+                      currentMonth={data.comparisonData.currentMonth}
+                    />
+                  </>
+                )}
+              </section>
+            </ErrorBoundary>
 
             {/* Section 2: 상품별 현황 */}
-            <section>
-              <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
-                📦 상품별 현황
-              </h2>
-              {data && (
-                <>
-                  <ProductMatrixTable
-                    data={data.productMatrix}
-                    totalCount={data.totalProductCount}
-                  />
-                  <ProductCharts
-                    typeData={data.productTypeData}
-                    weeksData={data.productWeeksData}
-                    totalCount={data.totalProductCount}
-                  />
-                </>
-              )}
-            </section>
+            <ErrorBoundary>
+              <section>
+                <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
+                  📦 상품별 현황
+                </h2>
+                {data && (
+                  <>
+                    <ProductMatrixTable
+                      data={data.productMatrix}
+                      totalCount={data.totalProductCount}
+                    />
+                    <ProductCharts
+                      typeData={data.productTypeData}
+                      weeksData={data.productWeeksData}
+                      totalCount={data.totalProductCount}
+                    />
+                  </>
+                )}
+              </section>
+            </ErrorBoundary>
 
             {/* Section 3: 환불 현황 */}
-            <section>
-              <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
-                🔴 환불 현황
-              </h2>
-              {data && (
-                <>
-                  <RefundSummaryCards {...data.refundSummary} />
-                  <RefundComparisonTable 
-                    data={data.refundComparison} 
-                    currentMonth={data.refundSummary.currentMonth}
-                  />
-                  <RefundDetailTable refunds={data.refundDetails} />
-                </>
-              )}
-            </section>
+            <ErrorBoundary>
+              <section>
+                <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
+                  🔴 환불 현황
+                </h2>
+                {data && (
+                  <>
+                    <RefundSummaryCards {...data.refundSummary} />
+                    <RefundComparisonTable
+                      data={data.refundComparison}
+                      currentMonth={data.refundSummary.currentMonth}
+                    />
+                    <RefundDetailTable refunds={data.refundDetails} />
+                  </>
+                )}
+              </section>
+            </ErrorBoundary>
 
             {/* 트렌드 차트 */}
-            {data && (
-              <RevenueTrendChart
-                weeklyData={data.trendData.weeklyData}
-                monthlyData={data.trendData.monthlyData}
-              />
-            )}
-
-            {/* Section 4: 추가 인사이트 */}
-            {currentWeekTx &&
-              prevWeekTx &&
-              yoyWeekTx &&
-              transactions &&
-              currentReport && (
-                <InsightsSection
-                  currentWeekTx={currentWeekTx}
-                  prevWeekTx={prevWeekTx}
-                  yoyWeekTx={yoyWeekTx}
-                  allTransactions={transactions}
-                  currentWeekStart={currentReport.start_date}
-                  currentWeekEnd={currentReport.end_date}
-                  prevWeekStart={prevWeekStart}
-                  prevWeekEnd={prevWeekEnd}
+            <ErrorBoundary>
+              {data && (
+                <RevenueTrendChart
+                  weeklyData={data.trendData.weeklyData}
+                  monthlyData={data.trendData.monthlyData}
                 />
               )}
+            </ErrorBoundary>
+
+            {/* Section 4: 추가 인사이트 */}
+            <ErrorBoundary>
+              {currentWeekTx &&
+                prevWeekTx &&
+                yoyWeekTx &&
+                transactions &&
+                currentReport && (
+                  <InsightsSection
+                    currentWeekTx={currentWeekTx}
+                    prevWeekTx={prevWeekTx}
+                    yoyWeekTx={yoyWeekTx}
+                    allTransactions={transactions}
+                    currentWeekStart={currentReport.start_date}
+                    currentWeekEnd={currentReport.end_date}
+                    prevWeekStart={prevWeekStart}
+                    prevWeekEnd={prevWeekEnd}
+                  />
+                )}
+            </ErrorBoundary>
 
             {/* Section 5: 멘토제 주간보고 */}
-            <section>
-              <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
-                🎓 멘토제 주간보고
-              </h2>
-              <p className="text-sm text-gray-600 mb-6">
-                멘토별 멘티 현황 및 이슈
-              </p>
-              <MentorSection reportId={reportId} />
-            </section>
+            <ErrorBoundary>
+              <section>
+                <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
+                  🎓 멘토제 주간보고
+                </h2>
+                <p className="text-sm text-gray-600 mb-6">
+                  멘토별 멘티 현황 및 이슈
+                </p>
+                <MentorSection reportId={reportId} />
+              </section>
+            </ErrorBoundary>
 
             {/* Section 6: 컨설턴트 리소스 현황 */}
-            <section>
-              <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
-                👥 컨설턴트 리소스 현황
-              </h2>
-              <p className="text-sm text-gray-600 mb-6">
-                직군별 배정 가능 컨설턴트 및 수용 인원
-              </p>
-              <ConsultantResourceSection reportId={reportId} />
-            </section>
+            <ErrorBoundary>
+              <section>
+                <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
+                  👥 컨설턴트 리소스 현황
+                </h2>
+                <p className="text-sm text-gray-600 mb-6">
+                  직군별 배정 가능 컨설턴트 및 수용 인원
+                </p>
+                <ConsultantResourceSection reportId={reportId} />
+              </section>
+            </ErrorBoundary>
 
             {/* Section 7: 보고 사항 */}
-            <section>
-              <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
-                📝 보고 사항
-              </h2>
-              <p className="text-sm text-gray-600 mb-6">
-                주차별 입력된 보고 내용
-              </p>
-              <ReportNotesSection reportId={reportId} />
-            </section>
+            <ErrorBoundary>
+              <section>
+                <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
+                  📝 보고 사항
+                </h2>
+                <p className="text-sm text-gray-600 mb-6">
+                  주차별 입력된 보고 내용
+                </p>
+                <ReportNotesSection reportId={reportId} />
+              </section>
+            </ErrorBoundary>
           </>
         )}
           </div>

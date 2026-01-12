@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResourceSummary } from "@/lib/types/consultant";
 
@@ -7,7 +8,7 @@ interface ResourceSummaryCardsProps {
   summary: ResourceSummary;
 }
 
-export function ResourceSummaryCards({ summary }: ResourceSummaryCardsProps) {
+export const ResourceSummaryCards = memo(function ResourceSummaryCards({ summary }: ResourceSummaryCardsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       {/* 총 컨설턴트 */}
@@ -62,7 +63,11 @@ export function ResourceSummaryCards({ summary }: ResourceSummaryCardsProps) {
       </Card>
     </div>
   );
-}
+});
+
+
+
+
 
 
 

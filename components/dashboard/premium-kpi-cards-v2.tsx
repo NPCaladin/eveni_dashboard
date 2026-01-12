@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -49,7 +50,7 @@ interface PremiumKPICardsV2Props {
   loading: boolean;
 }
 
-export function PremiumKPICardsV2({ data, loading }: PremiumKPICardsV2Props) {
+export const PremiumKPICardsV2 = memo(function PremiumKPICardsV2({ data, loading }: PremiumKPICardsV2Props) {
   if (loading || !data) {
     return (
       <div className="space-y-4">
@@ -394,9 +395,7 @@ export function PremiumKPICardsV2({ data, loading }: PremiumKPICardsV2Props) {
       </div>
     </div>
   );
-}
-
-
+});
 
 
 

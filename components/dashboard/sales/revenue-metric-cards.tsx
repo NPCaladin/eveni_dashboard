@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { formatManwon } from "@/lib/utils/format";
@@ -17,7 +18,7 @@ interface MetricCardProps {
   cardType?: "default" | "negative";
 }
 
-function MetricCard({
+const MetricCard = memo(function MetricCard({
   title,
   icon,
   mainValue,
@@ -77,7 +78,7 @@ function MetricCard({
       </CardContent>
     </Card>
   );
-}
+});
 
 interface RevenueMetricCardsProps {
   grossRevenue: number;
@@ -93,7 +94,7 @@ interface RevenueMetricCardsProps {
   prevYearRefund?: number;
 }
 
-export function RevenueMetricCards({
+export const RevenueMetricCards = memo(function RevenueMetricCards({
   grossRevenue,
   grossCount,
   refundAmount,
@@ -207,5 +208,5 @@ export function RevenueMetricCards({
       </div>
     </div>
   );
-}
+});
 

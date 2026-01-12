@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ParsedMentorReport } from "@/lib/types/mentor";
@@ -8,7 +9,7 @@ interface MentorSummaryCardsProps {
   reports: ParsedMentorReport[];
 }
 
-export function MentorSummaryCards({ reports }: MentorSummaryCardsProps) {
+export const MentorSummaryCards = memo(function MentorSummaryCards({ reports }: MentorSummaryCardsProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
       {reports.map((report) => (
@@ -54,7 +55,11 @@ export function MentorSummaryCards({ reports }: MentorSummaryCardsProps) {
       ))}
     </div>
   );
-}
+});
+
+
+
+
 
 
 

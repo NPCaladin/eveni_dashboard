@@ -6,6 +6,7 @@ import { useWeeklyReport } from "@/hooks/use-weekly-report";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { handleLoadError, handleSaveError, showSaveSuccess, showWarning } from "@/lib/utils/error";
 
 export function AdOverviewNotesForm() {
   const { reportId } = useWeeklyReport();
@@ -78,25 +79,15 @@ export function AdOverviewNotesForm() {
       
       if (error && error.code !== 'PGRST116') {
         // PGRST116 = no rows returned (데이터가 없는 경우)
-        console.error("load ad overview notes error", error);
-        toast({
-          title: "오류",
-          description: "광고 현황 인사이트를 불러오지 못했습니다.",
-          variant: "destructive",
-        });
+        handleLoadError(error, toast);
         return;
       }
       
       if (editorRef.current) {
         editorRef.current.innerHTML = (data as any)?.content || "";
       }
-    } catch (error) {
-      console.error("load ad overview notes error", error);
-      toast({
-        title: "오류",
-        description: "광고 현황 인사이트를 불러오지 못했습니다.",
-        variant: "destructive",
-      });
+    } catch (error: unknown) {
+      handleLoadError(error, toast);
     } finally {
       setLoading(false);
     }
@@ -108,7 +99,7 @@ export function AdOverviewNotesForm() {
 
   const handleSave = async () => {
     if (!reportId) {
-      toast({ title: "오류", description: "주차를 선택하세요.", variant: "destructive" });
+      showWarning(toast, "주차 미선택", "주차를 선택해주세요.");
       return;
     }
     setSaving(true);
@@ -128,15 +119,9 @@ export function AdOverviewNotesForm() {
       );
       
       if (error) throw error;
-      toast({ title: "저장 완료", description: "광고 현황 인사이트가 저장되었습니다." });
+      showSaveSuccess(toast, "광고 현황 인사이트가 저장되었습니다.");
     } catch (error: unknown) {
-      console.error("save ad overview notes error", error);
-      const errorMessage = error instanceof Error ? error.message : "광고 현황 인사이트 저장 중 오류가 발생했습니다.";
-      toast({
-        title: "저장 실패",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      handleSaveError(error, toast);
     } finally {
       setSaving(false);
     }

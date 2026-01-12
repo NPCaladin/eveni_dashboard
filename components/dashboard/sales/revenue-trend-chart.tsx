@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -31,7 +31,7 @@ interface RevenueTrendChartProps {
   monthlyData: TrendData[];
 }
 
-export function RevenueTrendChart({
+export const RevenueTrendChart = memo(function RevenueTrendChart({
   weeklyData,
   monthlyData,
 }: RevenueTrendChartProps) {
@@ -138,5 +138,4 @@ export function RevenueTrendChart({
       </CardContent>
     </Card>
   );
-}
-
+});

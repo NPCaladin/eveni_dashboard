@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -35,7 +36,7 @@ interface AdditionalInsightsProps {
   customerAnalysis: CustomerAnalysis;
 }
 
-export function AdditionalInsights({
+export const AdditionalInsights = memo(function AdditionalInsights({
   sellerPerformance,
   profitability,
   customerAnalysis,
@@ -206,5 +207,4 @@ export function AdditionalInsights({
       </Card>
     </div>
   );
-}
-
+});

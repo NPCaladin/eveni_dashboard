@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { formatManwon } from "@/lib/utils/format";
@@ -14,7 +15,7 @@ interface RefundCardProps {
   refundRate?: number;
 }
 
-function RefundCard({
+const RefundCard = memo(function RefundCard({
   title,
   count,
   amount,
@@ -85,7 +86,7 @@ function RefundCard({
       </CardContent>
     </Card>
   );
-}
+});
 
 interface RefundSummaryCardsProps {
   weeklyCount: number;
@@ -100,7 +101,7 @@ interface RefundSummaryCardsProps {
   currentMonth: number; // 1-12
 }
 
-export function RefundSummaryCards({
+export const RefundSummaryCards = memo(function RefundSummaryCards({
   weeklyCount,
   weeklyAmount,
   monthlyCount,
@@ -159,5 +160,4 @@ export function RefundSummaryCards({
       </div>
     </div>
   );
-}
-
+});

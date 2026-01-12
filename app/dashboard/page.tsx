@@ -12,6 +12,7 @@ import { DashboardContainer } from "@/components/dashboard/dashboard-container";
 import { Building2, Megaphone, GraduationCap, Users, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 export default function DashboardPage() {
   const { reportId, currentReport } = useWeeklyReport();
@@ -90,14 +91,18 @@ export default function DashboardPage() {
 
                   {/* 전체보기 탭 */}
                   <TabsContent value="all" className="space-y-6 mt-6">
-                    <ManagementSection
-                      mgmtReports={data?.mgmtReports || []}
-                      loading={loading}
-                    />
-                    <MarketingSection
-                      metrics={data?.marketingMetrics || []}
-                      loading={loading}
-                    />
+                    <ErrorBoundary>
+                      <ManagementSection
+                        mgmtReports={data?.mgmtReports || []}
+                        loading={loading}
+                      />
+                    </ErrorBoundary>
+                    <ErrorBoundary>
+                      <MarketingSection
+                        metrics={data?.marketingMetrics || []}
+                        loading={loading}
+                      />
+                    </ErrorBoundary>
                     <div className="border rounded-lg p-6">
                       <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                         <GraduationCap className="h-5 w-5" />
@@ -111,18 +116,22 @@ export default function DashboardPage() {
 
                   {/* 경영혁신실 탭 */}
                   <TabsContent value="management" className="mt-6">
-                    <ManagementSection
-                      mgmtReports={data?.mgmtReports || []}
-                      loading={loading}
-                    />
+                    <ErrorBoundary>
+                      <ManagementSection
+                        mgmtReports={data?.mgmtReports || []}
+                        loading={loading}
+                      />
+                    </ErrorBoundary>
                   </TabsContent>
 
                   {/* 마케팅본부 탭 */}
                   <TabsContent value="marketing" className="mt-6">
-                    <MarketingSection
-                      metrics={data?.marketingMetrics || []}
-                      loading={loading}
-                    />
+                    <ErrorBoundary>
+                      <MarketingSection
+                        metrics={data?.marketingMetrics || []}
+                        loading={loading}
+                      />
+                    </ErrorBoundary>
                   </TabsContent>
 
                   {/* 교육사업본부 탭 */}
