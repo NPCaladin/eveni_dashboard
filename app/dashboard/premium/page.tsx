@@ -516,7 +516,12 @@ export default function PremiumDashboardPage() {
     };
 
     // 멘토링 보고서 파싱하여 이슈 추출
+    console.log(`🔍 [프리미엄 대시보드] 멘토링 보고서 파싱 시작`);
+    console.log(`📋 원본 멘토링 보고서:`, mentoringReports);
+    
     const parsedMentorReports = mentoringReports.map(parseMentorReport);
+    console.log(`📊 파싱된 멘토링 보고서:`, parsedMentorReports);
+    
     const mentoringIssues: Array<{
       id: string;
       title: string;
@@ -530,7 +535,12 @@ export default function PremiumDashboardPage() {
     // 각 멘토의 파싱된 이슈들을 전체 이슈 목록에 추가
     mentoringReports.forEach((originalReport, mentorIdx) => {
       const parsedReport = parsedMentorReports[mentorIdx];
+      console.log(`👤 [멘토 ${mentorIdx}] ${parsedReport.mentorName} - 이슈 ${parsedReport.issues.length}건`);
+      console.log(`📝 원본 이슈 텍스트:`, originalReport.issues);
+      console.log(`📝 파싱된 이슈:`, parsedReport.issues);
+      
       parsedReport.issues.forEach((issue, issueIdx) => {
+        console.log(`  ➤ 이슈 ${issueIdx + 1}: ${issue.header}`);
         mentoringIssues.push({
           id: `${parsedReport.mentorName}-${issueIdx}`,
           title: issue.header || `이슈 ${issue.number}`,
@@ -542,6 +552,9 @@ export default function PremiumDashboardPage() {
         });
       });
     });
+    
+    console.log(`✅ 총 ${mentoringIssues.length}개 이슈 생성됨`);
+    console.log(`📋 최종 mentoringIssues:`, mentoringIssues);
 
     // 미개시 환불 (샘플)
     const unstartedRefunds = [

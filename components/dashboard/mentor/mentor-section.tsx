@@ -96,7 +96,11 @@ export function MentorSection({ reportId }: MentorSectionProps) {
       mentorName: parsedReports[0].mentorName,
       menteeStatus: parsedReports[0].menteeStatus,
       issuesCount: parsedReports[0].issues.length,
+      rawIssues: parsedReports[0].rawIssues,
+      issues: parsedReports[0].issues,
     });
+    console.log(`📝 원본 이슈 텍스트:`, reports[0].issues);
+    console.log(`📝 파싱된 이슈 상세:`, JSON.stringify(parsedReports[0].issues, null, 2));
   }
 
   return (
